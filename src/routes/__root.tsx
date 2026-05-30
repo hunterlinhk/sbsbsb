@@ -78,14 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "景鸿科技有限公司" },
+      { name: "description", content: "景鸿科技有限公司" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "景鸿科技有限公司" },
+      { property: "og:description", content: "景鸿科技有限公司" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "景鸿科技有限公司" },
+      { name: "twitter:description", content: "景鸿科技有限公司" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b62838f9-9001-4f45-a087-7f30d49bb1fc/id-preview-9963baa7--5efa5d48-020a-48b0-8fb0-786e2b322e92.lovable.app-1780130155858.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b62838f9-9001-4f45-a087-7f30d49bb1fc/id-preview-9963baa7--5efa5d48-020a-48b0-8fb0-786e2b322e92.lovable.app-1780130155858.png" },
     ],
     links: [
       {
