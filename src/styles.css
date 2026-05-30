@@ -5,18 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Jinghong Tech — Deep Navy Trust design system.
+ * Palette: #0f1b3d (deep navy) / #1e3a5f (indigo) / #3b6fa0 (mid blue) / #e8edf3 (silver)
+ * Typography: Libre Baskerville (display) + IBM Plex Sans (body)
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -59,29 +53,45 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-indigo-steel: var(--indigo-steel);
+  --color-mid-blue: var(--mid-blue);
+  --color-silver: var(--silver);
+  --color-copper: var(--copper);
+  --font-display: 'Libre Baskerville', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.25rem;
+  /* Brand palette — oklch */
+  --navy-deep: oklch(0.20 0.08 260);     /* #0f1b3d */
+  --navy: oklch(0.30 0.08 260);          /* #1e3a5f */
+  --indigo-steel: oklch(0.40 0.08 255);
+  --mid-blue: oklch(0.55 0.10 245);      /* #3b6fa0 */
+  --silver: oklch(0.94 0.01 250);        /* #e8edf3 */
+  --copper: oklch(0.72 0.13 50);
+
   --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --foreground: var(--navy-deep);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: var(--navy-deep);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: var(--navy-deep);
+  --primary: var(--navy-deep);
+  --primary-foreground: var(--silver);
+  --secondary: var(--silver);
+  --secondary-foreground: var(--navy-deep);
+  --muted: oklch(0.96 0.01 250);
+  --muted-foreground: oklch(0.45 0.03 255);
+  --accent: var(--mid-blue);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.90 0.01 250);
+  --input: oklch(0.90 0.01 250);
+  --ring: var(--mid-blue);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +150,29 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  .text-balance { text-wrap: balance; }
+  .bg-navy-gradient {
+    background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 50%, var(--indigo-steel) 100%);
+  }
+  .bg-hero-overlay {
+    background: linear-gradient(180deg, color-mix(in oklab, var(--navy-deep) 70%, transparent) 0%, color-mix(in oklab, var(--navy-deep) 92%, transparent) 100%);
+  }
+  .text-gradient-silver {
+    background: linear-gradient(135deg, #ffffff 0%, #c8d4e3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
