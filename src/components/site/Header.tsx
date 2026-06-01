@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 const links = [
   { to: "/", label: "首页" },
   { to: "/products", label: "产品中心" },
+  { to: "/news", label: "新闻资讯" },
   { to: "/about", label: "关于我们" },
   { to: "/contact", label: "联系我们" },
 ] as const;
