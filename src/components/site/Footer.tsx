@@ -46,9 +46,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-silver/50 sm:flex-row sm:justify-between">
+        <div className="mt-12 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-silver/50 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} 东莞市景鸿科技有限公司 版权所有</span>
-          <span>精密制造 · 智造未来</span>
+          <div className="flex items-center gap-4">
+            <span>精密制造 · 智造未来</span>
+            <Link to="/login" className="text-silver/60 hover:text-white transition-colors">
+              员工登录
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
