@@ -1,19 +1,27 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
-import logoUrl from "@/assets/logo.png";
-
-const links = [
-  { to: "/", label: "首页" },
-  { to: "/products", label: "产品中心" },
-  { to: "/news", label: "新闻资讯" },
-  { to: "/about", label: "关于我们" },
-  { to: "/contact", label: "联系我们" },
-] as const;
+import defaultLogo from "@/assets/logo.png";
+import { getSiteSettings } from "@/lib/site.functions";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { data } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => getSiteSettings(),
+    staleTime: 60_000,
+  });
+  const s = data?.item;
+  const logoUrl = s?.logo_url || defaultLogo;
+  const links = [
+    { to: "/", label: s?.nav_home || "首页" },
+    { to: "/products", label: s?.nav_products || "产品中心" },
+    { to: "/news", label: s?.nav_news || "新闻资讯" },
+    { to: "/about", label: s?.nav_about || "关于我们" },
+    { to: "/contact", label: s?.nav_contact || "联系我们" },
+  ] as const;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -25,16 +33,14 @@ export function Header() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-navy-deep/85 backdrop-blur-md border-b border-white/10"
-          : "bg-transparent"
+        scrolled ? "bg-navy-deep/85 backdrop-blur-md border-b border-white/10" : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:h-20 lg:px-10">
         <Link to="/" className="flex items-center group">
           <img
             src={logoUrl}
-            alt="景鸿科技 Jinghong Technology"
+            alt={s?.company_name || "景鸿科技"}
             className="h-10 w-auto lg:h-12 bg-white/95 px-2 py-1 rounded-sm"
           />
         </Link>
@@ -66,14 +72,10 @@ export function Header() {
           to="/contact"
           className="hidden rounded-sm border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white backdrop-blur transition-all hover:border-mid-blue hover:bg-mid-blue/20 lg:inline-flex"
         >
-          获取报价 →
+          {s?.nav_cta || "获取报价"} →
         </Link>
 
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-white lg:hidden"
-          aria-label="Toggle menu"
-        >
+        <button onClick={() => setOpen(!open)} className="text-white lg:hidden" aria-label="Toggle menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
