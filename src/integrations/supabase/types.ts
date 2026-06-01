@@ -14,8 +14,312 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_content: {
+        Row: {
+          hero_image: string | null
+          id: number
+          page_eyebrow: string | null
+          page_title_line1: string | null
+          page_title_line2: string | null
+          stat1_label: string | null
+          stat1_suffix: string | null
+          stat1_value: number | null
+          stat2_label: string | null
+          stat2_suffix: string | null
+          stat2_value: number | null
+          stat3_label: string | null
+          stat3_suffix: string | null
+          stat3_value: number | null
+          stat4_label: string | null
+          stat4_suffix: string | null
+          stat4_value: number | null
+          story_body: string | null
+          story_eyebrow: string | null
+          story_title: string | null
+          updated_at: string
+          workshop_desc: string | null
+          workshop_eyebrow: string | null
+          workshop_image: string | null
+          workshop_title: string | null
+        }
+        Insert: {
+          hero_image?: string | null
+          id?: number
+          page_eyebrow?: string | null
+          page_title_line1?: string | null
+          page_title_line2?: string | null
+          stat1_label?: string | null
+          stat1_suffix?: string | null
+          stat1_value?: number | null
+          stat2_label?: string | null
+          stat2_suffix?: string | null
+          stat2_value?: number | null
+          stat3_label?: string | null
+          stat3_suffix?: string | null
+          stat3_value?: number | null
+          stat4_label?: string | null
+          stat4_suffix?: string | null
+          stat4_value?: number | null
+          story_body?: string | null
+          story_eyebrow?: string | null
+          story_title?: string | null
+          updated_at?: string
+          workshop_desc?: string | null
+          workshop_eyebrow?: string | null
+          workshop_image?: string | null
+          workshop_title?: string | null
+        }
+        Update: {
+          hero_image?: string | null
+          id?: number
+          page_eyebrow?: string | null
+          page_title_line1?: string | null
+          page_title_line2?: string | null
+          stat1_label?: string | null
+          stat1_suffix?: string | null
+          stat1_value?: number | null
+          stat2_label?: string | null
+          stat2_suffix?: string | null
+          stat2_value?: number | null
+          stat3_label?: string | null
+          stat3_suffix?: string | null
+          stat3_value?: number | null
+          stat4_label?: string | null
+          stat4_suffix?: string | null
+          stat4_value?: number | null
+          story_body?: string | null
+          story_eyebrow?: string | null
+          story_title?: string | null
+          updated_at?: string
+          workshop_desc?: string | null
+          workshop_eyebrow?: string | null
+          workshop_image?: string | null
+          workshop_title?: string | null
+        }
+        Relationships: []
+      }
+      contact_content: {
+        Row: {
+          form_intro: string | null
+          form_title: string | null
+          id: number
+          info_eyebrow: string | null
+          info_title: string | null
+          map_subtitle: string | null
+          map_title: string | null
+          page_eyebrow: string | null
+          page_intro: string | null
+          page_title: string | null
+          page_title_italic: string | null
+          updated_at: string
+        }
+        Insert: {
+          form_intro?: string | null
+          form_title?: string | null
+          id?: number
+          info_eyebrow?: string | null
+          info_title?: string | null
+          map_subtitle?: string | null
+          map_title?: string | null
+          page_eyebrow?: string | null
+          page_intro?: string | null
+          page_title?: string | null
+          page_title_italic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          form_intro?: string | null
+          form_title?: string | null
+          id?: number
+          info_eyebrow?: string | null
+          info_title?: string | null
+          map_subtitle?: string | null
+          map_title?: string | null
+          page_eyebrow?: string | null
+          page_intro?: string | null
+          page_title?: string | null
+          page_title_italic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      home_capabilities: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          image: string | null
+          sort_order: number
+          title: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          sort_order?: number
+          title: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          sort_order?: number
+          title?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      home_content: {
+        Row: {
+          adv1_desc: string | null
+          adv1_image: string | null
+          adv1_tag: string | null
+          adv1_title: string | null
+          adv2_desc: string | null
+          adv2_image: string | null
+          adv2_tag: string | null
+          adv2_title: string | null
+          advantage_eyebrow: string | null
+          advantage_title: string | null
+          brands: Json | null
+          btn_contact: string | null
+          btn_explore: string | null
+          capabilities_desc: string | null
+          capabilities_eyebrow: string | null
+          capabilities_title: string | null
+          clients_eyebrow: string | null
+          clients_title: string | null
+          cta_button: string | null
+          cta_desc: string | null
+          cta_eyebrow: string | null
+          cta_title: string | null
+          hero_eyebrow: string | null
+          hero_image: string | null
+          hero_intro: string | null
+          hero_title_italic: string | null
+          hero_title_line1: string | null
+          hero_title_line2: string | null
+          id: number
+          stat1_label: string | null
+          stat1_suffix: string | null
+          stat1_value: number | null
+          stat2_label: string | null
+          stat2_suffix: string | null
+          stat2_value: number | null
+          stat3_label: string | null
+          stat3_suffix: string | null
+          stat3_value: number | null
+          stat4_label: string | null
+          stat4_suffix: string | null
+          stat4_value: number | null
+          stats_eyebrow: string | null
+          stats_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          adv1_desc?: string | null
+          adv1_image?: string | null
+          adv1_tag?: string | null
+          adv1_title?: string | null
+          adv2_desc?: string | null
+          adv2_image?: string | null
+          adv2_tag?: string | null
+          adv2_title?: string | null
+          advantage_eyebrow?: string | null
+          advantage_title?: string | null
+          brands?: Json | null
+          btn_contact?: string | null
+          btn_explore?: string | null
+          capabilities_desc?: string | null
+          capabilities_eyebrow?: string | null
+          capabilities_title?: string | null
+          clients_eyebrow?: string | null
+          clients_title?: string | null
+          cta_button?: string | null
+          cta_desc?: string | null
+          cta_eyebrow?: string | null
+          cta_title?: string | null
+          hero_eyebrow?: string | null
+          hero_image?: string | null
+          hero_intro?: string | null
+          hero_title_italic?: string | null
+          hero_title_line1?: string | null
+          hero_title_line2?: string | null
+          id?: number
+          stat1_label?: string | null
+          stat1_suffix?: string | null
+          stat1_value?: number | null
+          stat2_label?: string | null
+          stat2_suffix?: string | null
+          stat2_value?: number | null
+          stat3_label?: string | null
+          stat3_suffix?: string | null
+          stat3_value?: number | null
+          stat4_label?: string | null
+          stat4_suffix?: string | null
+          stat4_value?: number | null
+          stats_eyebrow?: string | null
+          stats_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adv1_desc?: string | null
+          adv1_image?: string | null
+          adv1_tag?: string | null
+          adv1_title?: string | null
+          adv2_desc?: string | null
+          adv2_image?: string | null
+          adv2_tag?: string | null
+          adv2_title?: string | null
+          advantage_eyebrow?: string | null
+          advantage_title?: string | null
+          brands?: Json | null
+          btn_contact?: string | null
+          btn_explore?: string | null
+          capabilities_desc?: string | null
+          capabilities_eyebrow?: string | null
+          capabilities_title?: string | null
+          clients_eyebrow?: string | null
+          clients_title?: string | null
+          cta_button?: string | null
+          cta_desc?: string | null
+          cta_eyebrow?: string | null
+          cta_title?: string | null
+          hero_eyebrow?: string | null
+          hero_image?: string | null
+          hero_intro?: string | null
+          hero_title_italic?: string | null
+          hero_title_line1?: string | null
+          hero_title_line2?: string | null
+          id?: number
+          stat1_label?: string | null
+          stat1_suffix?: string | null
+          stat1_value?: number | null
+          stat2_label?: string | null
+          stat2_suffix?: string | null
+          stat2_value?: number | null
+          stat3_label?: string | null
+          stat3_suffix?: string | null
+          stat3_value?: number | null
+          stat4_label?: string | null
+          stat4_suffix?: string | null
+          stat4_value?: number | null
+          stats_eyebrow?: string | null
+          stats_title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
+          admin_note: string | null
           company: string | null
           created_at: string
           email: string | null
@@ -24,8 +328,10 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          status: string
         }
         Insert: {
+          admin_note?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -34,8 +340,10 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          status?: string
         }
         Update: {
+          admin_note?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -44,6 +352,7 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -54,6 +363,9 @@ export type Database = {
           created_at: string
           id: string
           published: boolean
+          published_date: string | null
+          seo_desc: string | null
+          seo_title: string | null
           summary: string | null
           title: string
           updated_at: string
@@ -64,6 +376,9 @@ export type Database = {
           created_at?: string
           id?: string
           published?: boolean
+          published_date?: string | null
+          seo_desc?: string | null
+          seo_title?: string | null
           summary?: string | null
           title: string
           updated_at?: string
@@ -74,8 +389,152 @@ export type Database = {
           created_at?: string
           id?: string
           published?: boolean
+          published_date?: string | null
+          seo_desc?: string | null
+          seo_title?: string | null
           summary?: string | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      process_steps: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          sort_order: number
+          step_no: string
+          title: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          sort_order?: number
+          step_no: string
+          title: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          sort_order?: number
+          step_no?: string
+          title?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          applications: string | null
+          cover_url: string | null
+          created_at: string
+          featured: boolean
+          features: Json
+          id: string
+          intro: string
+          name: string
+          name_en: string | null
+          process: string | null
+          published: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          applications?: string | null
+          cover_url?: string | null
+          created_at?: string
+          featured?: boolean
+          features?: Json
+          id?: string
+          intro?: string
+          name: string
+          name_en?: string | null
+          process?: string | null
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          applications?: string | null
+          cover_url?: string | null
+          created_at?: string
+          featured?: boolean
+          features?: Json
+          id?: string
+          intro?: string
+          name?: string
+          name_en?: string | null
+          process?: string | null
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          address: string | null
+          business_hours: string | null
+          company_name: string | null
+          company_name_en: string | null
+          email: string | null
+          footer_copyright: string | null
+          footer_intro: string | null
+          footer_slogan: string | null
+          id: number
+          logo_url: string | null
+          nav_about: string | null
+          nav_contact: string | null
+          nav_cta: string | null
+          nav_home: string | null
+          nav_news: string | null
+          nav_products: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          business_hours?: string | null
+          company_name?: string | null
+          company_name_en?: string | null
+          email?: string | null
+          footer_copyright?: string | null
+          footer_intro?: string | null
+          footer_slogan?: string | null
+          id?: number
+          logo_url?: string | null
+          nav_about?: string | null
+          nav_contact?: string | null
+          nav_cta?: string | null
+          nav_home?: string | null
+          nav_news?: string | null
+          nav_products?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          business_hours?: string | null
+          company_name?: string | null
+          company_name_en?: string | null
+          email?: string | null
+          footer_copyright?: string | null
+          footer_intro?: string | null
+          footer_slogan?: string | null
+          id?: number
+          logo_url?: string | null
+          nav_about?: string | null
+          nav_contact?: string | null
+          nav_cta?: string | null
+          nav_home?: string | null
+          nav_news?: string | null
+          nav_products?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
