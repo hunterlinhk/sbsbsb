@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getAdminToken } from "@/lib/admin-auth";
 import { SiteSettingsPanel, AboutPanel, ContactPanel } from "@/components/admin/SettingsPanel";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const search = Route.useSearch();
   const [token, setToken] = useState<string | null>(null);
   const [tab, setTab] = useState<AdminTabId>("settings");
@@ -38,6 +39,10 @@ function AdminPage() {
   }, [search.tab]);
 
   if (!token) return null;
+
+  if (location.pathname.startsWith("/admin/live-editor")) {
+    return <Outlet />;
+  }
 
   const current = ADMIN_TABS.find((t) => t.id === tab)!;
   const onSelectTab = (next: AdminTabId) => {
