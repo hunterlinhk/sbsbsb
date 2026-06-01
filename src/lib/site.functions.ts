@@ -142,6 +142,57 @@ export const updateHomeContent = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const saveHomeLiveEditor = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    pw.extend({
+      values: z.object({
+        hero_eyebrow: z.string().optional(),
+        hero_title_line1: z.string().optional(),
+        hero_title_line2: z.string().optional(),
+        hero_intro: z.string().optional(),
+        hero_image: z.string().optional(),
+        btn_explore: z.string().optional(),
+        btn_explore_link: z.string().optional(),
+        btn_contact: z.string().optional(),
+        btn_contact_link: z.string().optional(),
+        stats_title: z.string().optional(),
+        capabilities_title: z.string().optional(),
+        clients_title: z.string().optional(),
+        advantage_title: z.string().optional(),
+        adv1_title: z.string().optional(),
+        adv1_desc: z.string().optional(),
+        adv1_image: z.string().optional(),
+        adv2_title: z.string().optional(),
+        adv2_desc: z.string().optional(),
+        adv2_image: z.string().optional(),
+        cta_title: z.string().optional(),
+        cta_desc: z.string().optional(),
+        cta_button: z.string().optional(),
+        cta_button_link: z.string().optional(),
+        section_order: z.array(z.enum(["hero", "stats", "capabilities", "clients", "advantage", "cta"])).optional(),
+        section_visibility: z
+          .object({
+            hero: z.boolean().optional(),
+            stats: z.boolean().optional(),
+            capabilities: z.boolean().optional(),
+            clients: z.boolean().optional(),
+            advantage: z.boolean().optional(),
+            cta: z.boolean().optional(),
+          })
+          .optional(),
+      }),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    requireAdmin(data.password);
+    const { error } = await supabaseAdmin
+      .from("home_content")
+      .update(data.values as never)
+      .eq("id", 1);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const updateAboutContent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     pw.extend({ values: z.record(z.string(), z.any()) }).parse(input),
