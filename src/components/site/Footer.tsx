@@ -8,16 +8,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-gradient-to-br from-mid-blue to-indigo-steel font-display text-lg font-bold text-white">
-                景
-              </div>
-              <div>
-                <div className="font-display text-lg font-bold text-white">东莞市景鸿科技有限公司</div>
-                <div className="text-[11px] uppercase tracking-[0.2em] text-silver/60">
-                  DONGGUAN JINGHONG TECHNOLOGY CO., LTD.
-                </div>
-              </div>
+            <div className="inline-flex items-center bg-white rounded-sm p-3">
+              <img src={logoUrl} alt="景鸿科技 Jinghong Technology" className="h-14 w-auto" />
             </div>
             <p className="mt-6 max-w-md text-sm leading-relaxed">
               专注于精密线圈和微型直线电机制造，融合精益生产理念与自动化技术，
