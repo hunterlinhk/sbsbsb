@@ -236,7 +236,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
-        .from("products").insert({ name: "新产品", ...data.values } as never);
+        .from("products").insert(({ name: "新产品", ...data.values }) as never);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -279,7 +279,7 @@ export const upsertStep = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
-        .from("process_steps").insert({ step_no: "00", title: "新步骤", ...data.values } as never);
+        .from("process_steps").insert(({ step_no: "00", title: "新步骤", ...data.values }) as never);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -322,7 +322,7 @@ export const upsertNews = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
-        .from("news").insert({ title: "新文章", content: "", ...data.values } as never);
+        .from("news").insert(({ title: "新文章", content: "", ...data.values }) as never);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -403,7 +403,7 @@ export const updateInquiry = createServerFn({ method: "POST" })
       upd.handled = data.status === "done";
     }
     if (data.admin_note !== undefined) upd.admin_note = data.admin_note;
-    const { error } = await supabaseAdmin.from("inquiries").update(upd).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("inquiries").update(upd as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
