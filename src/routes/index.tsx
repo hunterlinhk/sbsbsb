@@ -57,7 +57,7 @@ function Index() {
   );
 }
 
-type H = Awaited<ReturnType<typeof getHomeContent>>["home"];
+type H = Awaited<ReturnType<typeof getHomeContent>>["home"] | undefined;
 
 function splitItalic(text: string, italic: string) {
   if (!italic || !text.includes(italic)) return [text, "", ""] as const;
