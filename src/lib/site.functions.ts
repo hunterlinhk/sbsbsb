@@ -125,7 +125,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdmin(data.password);
     const { error } = await supabaseAdmin
-      .from("site_settings").update(data.values).eq("id", 1);
+      .from("site_settings").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -137,7 +137,7 @@ export const updateHomeContent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdmin(data.password);
     const { error } = await supabaseAdmin
-      .from("home_content").update(data.values).eq("id", 1);
+      .from("home_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -149,7 +149,7 @@ export const updateAboutContent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdmin(data.password);
     const { error } = await supabaseAdmin
-      .from("about_content").update(data.values).eq("id", 1);
+      .from("about_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -161,7 +161,7 @@ export const updateContactContent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdmin(data.password);
     const { error } = await supabaseAdmin
-      .from("contact_content").update(data.values).eq("id", 1);
+      .from("contact_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -189,7 +189,7 @@ export const upsertCapability = createServerFn({ method: "POST" })
     requireAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin
-        .from("home_capabilities").update(data.values).eq("id", data.id);
+        .from("home_capabilities").update(data.values as never).eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
@@ -232,7 +232,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
     requireAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin
-        .from("products").update(data.values).eq("id", data.id);
+        .from("products").update(data.values as never).eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
@@ -275,7 +275,7 @@ export const upsertStep = createServerFn({ method: "POST" })
     requireAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin
-        .from("process_steps").update(data.values).eq("id", data.id);
+        .from("process_steps").update(data.values as never).eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
@@ -318,7 +318,7 @@ export const upsertNews = createServerFn({ method: "POST" })
     requireAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin
-        .from("news").update(data.values).eq("id", data.id);
+        .from("news").update(data.values as never).eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
