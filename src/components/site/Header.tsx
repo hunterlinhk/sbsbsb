@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import logoUrl from "@/assets/logo.png";
 
 const links = [
   { to: "/", label: "首页" },
@@ -30,14 +31,12 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:h-20 lg:px-10">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-gradient-to-br from-mid-blue to-indigo-steel font-display text-lg font-bold text-white shadow-lg shadow-mid-blue/30">
-            景
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="font-display text-base font-bold text-white">景鸿科技</span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-silver/70">JINGHONG TECH</span>
-          </div>
+        <Link to="/" className="flex items-center group">
+          <img
+            src={logoUrl}
+            alt="景鸿科技 Jinghong Technology"
+            className="h-10 w-auto lg:h-12 bg-white/95 rounded-sm px-2 py-1"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
