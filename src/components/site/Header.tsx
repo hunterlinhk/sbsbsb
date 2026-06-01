@@ -35,7 +35,7 @@ export function Header() {
           <img
             src={logoUrl}
             alt="景鸿科技 Jinghong Technology"
-            className="h-10 w-auto lg:h-12 bg-white/95 rounded-sm px-2 py-1"
+            className="h-10 w-auto lg:h-12 bg-white/95 px-2 py-1 rounded-sm"
           />
         </Link>
 
