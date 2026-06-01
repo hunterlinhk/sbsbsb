@@ -5,6 +5,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import { toast } from "sonner";
+import { submitInquiry } from "@/lib/site.functions";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -24,14 +25,28 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const fd = new FormData(form);
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await submitInquiry({
+        data: {
+          name: String(fd.get("name") || ""),
+          company: String(fd.get("company") || "") || null,
+          phone: String(fd.get("phone") || "") || null,
+          email: String(fd.get("email") || "") || null,
+          message: String(fd.get("message") || ""),
+        },
+      });
       toast.success("已收到您的询盘，我们会尽快与您联系！");
-      (e.target as HTMLFormElement).reset();
+      form.reset();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "提交失败，请稍后再试");
+    } finally {
       setSubmitting(false);
-    }, 800);
+    }
   };
 
   return (

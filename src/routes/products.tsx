@@ -5,6 +5,7 @@ import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import coilImg from "@/assets/product-coil.jpg";
 import motorImg from "@/assets/product-motor.jpg";
+import wirelessImg from "@/assets/product-wireless-coil.jpg";
 import workshopImg from "@/assets/workshop.jpg";
 import qualityImg from "@/assets/quality.jpg";
 
@@ -36,6 +37,18 @@ const products = [
       "结构类型：空心线圈、骨架线圈、自粘线圈等",
       "应用领域：摄像头VCM、震动马达、无线充电等",
       "月产能：2000万个",
+    ],
+  },
+  {
+    img: wirelessImg,
+    tag: "Wireless Charging Coils",
+    name: "无线充线圈",
+    desc: "针对智能手机及可穿戴设备的无线充电模组，提供高效能、高一致性的无线充线圈产品，支持Qi标准，兼容主流无线充电方案。",
+    specs: [
+      "标准兼容：支持 Qi 无线充电标准",
+      "应用：智能手机、TWS耳机仓、可穿戴设备",
+      "性能：高Q值，低损耗，高传输效率",
+      "工艺：精密绕线 + 自动化贴合",
     ],
   },
   {
@@ -88,7 +101,7 @@ function ProductsPage() {
                 <span className="italic text-mid-blue">产品矩阵</span>
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg">
-                覆盖精密线圈与微型直线电机两大核心产品线，
+                覆盖精密线圈、无线充线圈与微型直线电机三大核心产品线，
                 以稳定的产能和严苛的品质标准服务全球知名手机品牌。
               </p>
             </Reveal>
