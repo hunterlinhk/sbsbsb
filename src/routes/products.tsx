@@ -101,7 +101,7 @@ function ProductsPage() {
                 <span className="italic text-mid-blue">产品矩阵</span>
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg">
-                覆盖精密线圈与微型直线电机两大核心产品线，
+                覆盖精密线圈、无线充线圈与微型直线电机三大核心产品线，
                 以稳定的产能和严苛的品质标准服务全球知名手机品牌。
               </p>
             </Reveal>
