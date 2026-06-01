@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import logoUrl from "@/assets/logo.png";
 
 const links = [
   { to: "/", label: "首页" },
