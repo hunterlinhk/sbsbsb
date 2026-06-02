@@ -268,7 +268,7 @@ function EditableText({
   };
 
   return (
-    // @ts-expect-error - dynamic intrinsic tag
+    
     <Tag
       ref={ref as never}
       data-editable-text={fieldKey}
