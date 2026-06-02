@@ -281,25 +281,46 @@ function FontControls({
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <div className="mb-1 text-xs text-muted-foreground">粗细</div>
+          <select
+            className="w-full border border-border bg-white px-2 py-1.5 text-sm"
+            value={value.weight ?? (value.bold ? "bold" : "")}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({
+                weight: v === "" ? undefined : (v as FieldStyle["weight"]),
+                bold: undefined,
+              });
+            }}
+          >
+            <option value="">默认（继承）</option>
+            <option value="normal">常规 400</option>
+            <option value="bold">加粗 700</option>
+            <option value="black">特粗 900</option>
+          </select>
+        </div>
+        <div>
+          <div className="mb-1 text-xs text-muted-foreground">字形</div>
+          <select
+            className="w-full border border-border bg-white px-2 py-1.5 text-sm"
+            value={value.italic ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ italic: v === "" ? undefined : (v as "normal" | "italic") });
+            }}
+          >
+            <option value="">默认（继承）</option>
+            <option value="normal">正常</option>
+            <option value="italic">斜体</option>
+          </select>
+        </div>
+      </div>
+
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => update({ bold: !value.bold })}
-          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
-            value.bold ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
-          }`}
-        >
-          <Bold size={12} /> 加粗
-        </button>
-        <button
-          type="button"
-          onClick={() => update({ italic: !value.italic })}
-          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
-            value.italic ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
-          }`}
-        >
-          <Italic size={12} /> 斜体
-        </button>
+        <Bold size={12} className="text-muted-foreground" />
+        <Italic size={12} className="text-muted-foreground" />
         <button
           type="button"
           onClick={() => onChange({})}
