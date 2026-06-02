@@ -99,10 +99,14 @@ const BUILTIN_FONTS: { label: string; value: string }[] = [
 type FieldStyle = {
   fontFamily?: string;
   fontSize?: number;
+  weight?: "normal" | "bold" | "black";
+  italic?: "normal" | "italic";
+  // legacy field, still honored for previously-saved data
   bold?: boolean;
-  italic?: boolean;
 };
 type FieldStyles = Record<string, FieldStyle>;
+
+const PREV_SNAPSHOT_KEY = "home-content-prev-snapshot";
 
 const checkerboardStyle = {
   backgroundColor: "#0f172a",
@@ -142,14 +146,24 @@ function parseFieldStyles(value: unknown): FieldStyles {
   return value as FieldStyles;
 }
 
+function weightToCss(w: FieldStyle["weight"]): number | undefined {
+  if (w === "normal") return 400;
+  if (w === "bold") return 700;
+  if (w === "black") return 900;
+  return undefined;
+}
+
 function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
   const s = styles[key];
   if (!s) return undefined;
   const css: CSSProperties = {};
   if (s.fontFamily) css.fontFamily = s.fontFamily;
   if (s.fontSize) css.fontSize = `${s.fontSize}px`;
-  if (s.bold) css.fontWeight = 700;
-  if (s.italic) css.fontStyle = "italic";
+  const w = weightToCss(s.weight);
+  if (w !== undefined) css.fontWeight = w;
+  else if (s.bold) css.fontWeight = 700;
+  if (s.italic === "italic") css.fontStyle = "italic";
+  else if (s.italic === "normal") css.fontStyle = "normal";
   return Object.keys(css).length ? css : undefined;
 }
 
@@ -267,25 +281,46 @@ function FontControls({
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <div className="mb-1 text-xs text-muted-foreground">粗细</div>
+          <select
+            className="w-full border border-border bg-white px-2 py-1.5 text-sm"
+            value={value.weight ?? (value.bold ? "bold" : "")}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({
+                weight: v === "" ? undefined : (v as FieldStyle["weight"]),
+                bold: undefined,
+              });
+            }}
+          >
+            <option value="">默认（继承）</option>
+            <option value="normal">常规 400</option>
+            <option value="bold">加粗 700</option>
+            <option value="black">特粗 900</option>
+          </select>
+        </div>
+        <div>
+          <div className="mb-1 text-xs text-muted-foreground">字形</div>
+          <select
+            className="w-full border border-border bg-white px-2 py-1.5 text-sm"
+            value={value.italic ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              update({ italic: v === "" ? undefined : (v as "normal" | "italic") });
+            }}
+          >
+            <option value="">默认（继承）</option>
+            <option value="normal">正常</option>
+            <option value="italic">斜体</option>
+          </select>
+        </div>
+      </div>
+
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => update({ bold: !value.bold })}
-          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
-            value.bold ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
-          }`}
-        >
-          <Bold size={12} /> 加粗
-        </button>
-        <button
-          type="button"
-          onClick={() => update({ italic: !value.italic })}
-          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
-            value.italic ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
-          }`}
-        >
-          <Italic size={12} /> 斜体
-        </button>
+        <Bold size={12} className="text-muted-foreground" />
+        <Italic size={12} className="text-muted-foreground" />
         <button
           type="button"
           onClick={() => onChange({})}
@@ -376,10 +411,18 @@ export function LiveEditorPanel({ token }: { token: string }) {
 
   const setFieldStyle = (key: string, style: FieldStyle) => {
     const next: FieldStyles = { ...fieldStyles };
-    if (!style || Object.keys(style).length === 0) {
+    // prune keys whose value is undefined
+    const cleaned: FieldStyle = {};
+    (Object.keys(style) as (keyof FieldStyle)[]).forEach((k) => {
+      const v = style[k];
+      if (v !== undefined && v !== "" && !(typeof v === "boolean" && v === false)) {
+        (cleaned as Record<string, unknown>)[k] = v;
+      }
+    });
+    if (Object.keys(cleaned).length === 0) {
       delete next[key];
     } else {
-      next[key] = style;
+      next[key] = cleaned;
     }
     setValue("field_styles", next);
   };
@@ -396,9 +439,27 @@ export function LiveEditorPanel({ token }: { token: string }) {
     setValue("section_order", next);
   };
 
+  const [hasSnapshot, setHasSnapshot] = useState(false);
+  useEffect(() => {
+    try {
+      setHasSnapshot(!!localStorage.getItem(PREV_SNAPSHOT_KEY));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const save = async () => {
     setSaving(true);
     try {
+      // Snapshot the last-known-saved DB state so the user can revert.
+      try {
+        if (data?.home) {
+          localStorage.setItem(PREV_SNAPSHOT_KEY, JSON.stringify(data.home));
+          setHasSnapshot(true);
+        }
+      } catch {
+        /* ignore quota */
+      }
       await saveHomeLiveEditor({
         data: {
           password: token,
@@ -410,7 +471,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
           },
         },
       });
-      toast.success("已保存");
+      toast.success("已保存（可在底部点“恢复上一版本”回滚）");
       qc.invalidateQueries({ queryKey: ["home-content"] });
       qc.invalidateQueries({ queryKey: ["admin-home"] });
       qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
@@ -420,6 +481,24 @@ export function LiveEditorPanel({ token }: { token: string }) {
       setSaving(false);
     }
   };
+
+  const restorePrevious = () => {
+    try {
+      const raw = localStorage.getItem(PREV_SNAPSHOT_KEY);
+      if (!raw) {
+        toast.error("没有可恢复的版本");
+        return;
+      }
+      const prev = JSON.parse(raw);
+      if (prev && typeof prev === "object") {
+        setForm(prev as Record<string, unknown>);
+        toast.success("已载入上一版本，点击“保存”后才会生效");
+      }
+    } catch {
+      toast.error("恢复失败：快照已损坏");
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -911,7 +990,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
           </div>
         </div>
 
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border border-border bg-white px-4 py-3">
+            <div className="text-sm text-navy-deep">
+              <span className="font-semibold">版本回滚：</span>
+              <span className="text-muted-foreground">
+                {hasSnapshot
+                  ? "可恢复到上一次保存前的版本。点击恢复后，仍需点“保存”才会生效。"
+                  : "尚无可恢复版本。每次保存都会自动备份上一版本。"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={restorePrevious}
+              disabled={!hasSnapshot}
+              className="border border-border bg-white px-3 py-1.5 text-sm text-navy-deep disabled:opacity-40"
+            >
+              恢复上一版本
+            </button>
+          </div>
           <SaveBar saving={saving} onSave={save} label="保存可视化编辑器修改" />
         </div>
       </div>
