@@ -99,10 +99,14 @@ const BUILTIN_FONTS: { label: string; value: string }[] = [
 type FieldStyle = {
   fontFamily?: string;
   fontSize?: number;
+  weight?: "normal" | "bold" | "black";
+  italic?: "normal" | "italic";
+  // legacy field, still honored for previously-saved data
   bold?: boolean;
-  italic?: boolean;
 };
 type FieldStyles = Record<string, FieldStyle>;
+
+const PREV_SNAPSHOT_KEY = "home-content-prev-snapshot";
 
 const checkerboardStyle = {
   backgroundColor: "#0f172a",
@@ -142,14 +146,24 @@ function parseFieldStyles(value: unknown): FieldStyles {
   return value as FieldStyles;
 }
 
+function weightToCss(w: FieldStyle["weight"]): number | undefined {
+  if (w === "normal") return 400;
+  if (w === "bold") return 700;
+  if (w === "black") return 900;
+  return undefined;
+}
+
 function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
   const s = styles[key];
   if (!s) return undefined;
   const css: CSSProperties = {};
   if (s.fontFamily) css.fontFamily = s.fontFamily;
   if (s.fontSize) css.fontSize = `${s.fontSize}px`;
-  if (s.bold) css.fontWeight = 700;
-  if (s.italic) css.fontStyle = "italic";
+  const w = weightToCss(s.weight);
+  if (w !== undefined) css.fontWeight = w;
+  else if (s.bold) css.fontWeight = 700;
+  if (s.italic === "italic") css.fontStyle = "italic";
+  else if (s.italic === "normal") css.fontStyle = "normal";
   return Object.keys(css).length ? css : undefined;
 }
 
