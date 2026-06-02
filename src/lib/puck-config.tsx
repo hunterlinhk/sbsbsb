@@ -10,6 +10,8 @@ export const BUILTIN_FONTS: { label: string; value: string }[] = [
   { label: "Serif", value: "ui-serif, Georgia, Cambria, Times New Roman, serif" },
   { label: "Mono", value: "ui-monospace, SFMono-Regular, Menlo, monospace" },
   { label: "苹方 / PingFang", value: '"PingFang SC", "Microsoft YaHei", sans-serif' },
+  { label: "优设标题黑", value: '"YouSheBiaoTiHei", "PingFang SC", sans-serif' },
+  { label: "钉钉进步体", value: '"DingDingJinBuTi", "PingFang SC", sans-serif' },
 ];
 
 // ============ Section render components ============
