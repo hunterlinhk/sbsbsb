@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Cpu, Factory, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
-import { Fragment, useMemo, useRef } from "react";
+import { Fragment, useMemo, useRef, type ReactNode } from "react";
 import { Counter } from "@/components/site/Counter";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
