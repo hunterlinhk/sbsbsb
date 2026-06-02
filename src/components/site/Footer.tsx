@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import defaultLogo from "@/assets/logo.png";
 import { getSiteSettings } from "@/lib/site.functions";
 
@@ -10,52 +10,57 @@ export function Footer() {
     queryFn: () => getSiteSettings(),
     staleTime: 60_000,
   });
+
   const s = data?.item;
   const logoUrl = s?.logo_url || defaultLogo;
-  const copyright = (s?.footer_copyright || "© {year} 东莞市景鸿科技有限公司 版权所有").replace(
+  const copyright = (s?.footer_copyright || "Copyright {year} Company. All rights reserved.").replace(
     "{year}",
     String(new Date().getFullYear()),
   );
 
   return (
-    <footer className="bg-navy-deep text-silver/70 border-t border-white/5">
+    <footer className="border-t border-white/5 bg-navy-deep text-silver/70">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-4">
           <div className="lg:col-span-2">
-            <div className="inline-flex items-center bg-white rounded-sm p-3">
-              <img src={logoUrl} alt={s?.company_name || "景鸿科技"} className="h-14 w-auto" />
+            <div className="inline-flex items-center">
+              <img
+                src={logoUrl}
+                alt={s?.company_name || "Logo"}
+                className="h-14 w-auto max-w-[12rem] object-contain"
+              />
             </div>
             <p className="mt-6 max-w-md text-sm leading-relaxed">
               {s?.footer_intro ||
-                "专注于精密线圈和微型直线电机制造，融合精益生产理念与自动化技术，为全球知名手机厂家提供优质线圈制造服务。"}
+                "Focused on precision manufacturing, reliable delivery, and scalable production support."}
             </p>
           </div>
 
           <div>
-            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">导航</h4>
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">Navigation</h4>
             <ul className="mt-4 space-y-2 text-sm">
-              <li><Link to="/" className="hover:text-white transition-colors">{s?.nav_home || "首页"}</Link></li>
-              <li><Link to="/products" className="hover:text-white transition-colors">{s?.nav_products || "产品中心"}</Link></li>
-              <li><Link to="/news" className="hover:text-white transition-colors">{s?.nav_news || "新闻资讯"}</Link></li>
-              <li><Link to="/about" className="hover:text-white transition-colors">{s?.nav_about || "关于我们"}</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition-colors">{s?.nav_contact || "联系我们"}</Link></li>
+              <li><Link to="/" className="transition-colors hover:text-white">{s?.nav_home || "Home"}</Link></li>
+              <li><Link to="/products" className="transition-colors hover:text-white">{s?.nav_products || "Products"}</Link></li>
+              <li><Link to="/news" className="transition-colors hover:text-white">{s?.nav_news || "News"}</Link></li>
+              <li><Link to="/about" className="transition-colors hover:text-white">{s?.nav_about || "About"}</Link></li>
+              <li><Link to="/contact" className="transition-colors hover:text-white">{s?.nav_contact || "Contact"}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">联系方式</h4>
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">Contact</h4>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin size={16} className="mt-0.5 shrink-0 text-mid-blue" />
-                <span>{s?.address || "广东省东莞市凤岗镇"}</span>
+                <span>{s?.address || "Dongguan, Guangdong"}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Phone size={16} className="mt-0.5 shrink-0 text-mid-blue" />
-                <span>{s?.phone || "请联系我们获取"}</span>
+                <span>{s?.phone || "Please contact us for phone support"}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Mail size={16} className="mt-0.5 shrink-0 text-mid-blue" />
-                <span>{s?.email || "请联系我们获取"}</span>
+                <span>{s?.email || "Please contact us for email support"}</span>
               </li>
             </ul>
           </div>
@@ -64,9 +69,9 @@ export function Footer() {
         <div className="mt-12 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-silver/50 sm:flex-row sm:items-center sm:justify-between">
           <span>{copyright}</span>
           <div className="flex items-center gap-4">
-            <span>{s?.footer_slogan || "精密制造 · 智造未来"}</span>
-            <Link to="/login" className="text-silver/60 hover:text-white transition-colors">
-              员工登录
+            <span>{s?.footer_slogan || "Precision manufacturing for modern products"}</span>
+            <Link to="/login" className="text-silver/60 transition-colors hover:text-white">
+              Staff Login
             </Link>
           </div>
         </div>
