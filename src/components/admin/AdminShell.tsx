@@ -40,6 +40,7 @@ export function AdminShell({
   activeTab,
   liveEditorActive = false,
   puckActive = false,
+  wide = false,
   onSelectTab,
   children,
 }: {
@@ -47,9 +48,11 @@ export function AdminShell({
   activeTab?: AdminTabId;
   liveEditorActive?: boolean;
   puckActive?: boolean;
+  wide?: boolean;
   onSelectTab?: (tab: AdminTabId) => void;
   children: ReactNode;
 }) {
+
   const navigate = useNavigate();
 
   const logout = () => {
