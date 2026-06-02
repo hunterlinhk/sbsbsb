@@ -79,7 +79,7 @@ export function AdminShell({
           <nav className="sticky top-24 space-y-1">
             {ADMIN_TABS.map((t) => {
               const Icon = t.icon;
-              const active = !liveEditorActive && activeTab === t.id;
+              const active = !liveEditorActive && !puckActive && activeTab === t.id;
               return (
                 <button
                   key={t.id}
