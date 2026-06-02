@@ -17,11 +17,11 @@ export function Header() {
   const s = data?.item;
   const logoUrl = s?.logo_url || defaultLogo;
   const links = [
-    { to: "/", label: s?.nav_home || "Home" },
-    { to: "/products", label: s?.nav_products || "Products" },
-    { to: "/news", label: s?.nav_news || "News" },
-    { to: "/about", label: s?.nav_about || "About" },
-    { to: "/contact", label: s?.nav_contact || "Contact" },
+    { to: "/", label: s?.nav_home || "首页" },
+    { to: "/products", label: s?.nav_products || "产品" },
+    { to: "/news", label: s?.nav_news || "新闻" },
+    { to: "/about", label: s?.nav_about || "关于我们" },
+    { to: "/contact", label: s?.nav_contact || "联系我们" },
   ] as const;
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function Header() {
           to="/contact"
           className="hidden rounded-sm border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white backdrop-blur transition-all hover:border-mid-blue hover:bg-mid-blue/20 lg:inline-flex"
         >
-          {s?.nav_cta || "Get Quote"} {"->"}
+          {s?.nav_cta || "获取报价"} {"->"}
         </Link>
 
         <button onClick={() => setOpen(!open)} className="text-white lg:hidden" aria-label="Toggle menu">

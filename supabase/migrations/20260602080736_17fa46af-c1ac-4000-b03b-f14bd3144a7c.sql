@@ -1,0 +1,1 @@
+ALTER TABLE public.home_content ADD COLUMN IF NOT EXISTS field_styles jsonb NOT NULL DEFAULT '{}'::jsonb;

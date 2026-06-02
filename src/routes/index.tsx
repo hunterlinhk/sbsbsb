@@ -35,6 +35,25 @@ const ICONS: Record<string, LucideIcon> = { Cpu, Zap, Factory, ShieldCheck };
 const DEFAULT_SECTION_ORDER: SectionId[] = ["hero", "stats", "capabilities", "clients", "advantage", "cta"];
 const DEFAULT_BRANDS = ["SAMSUNG", "HUAWEI", "XIAOMI", "TRANSSION", "OPPO", "VIVO"];
 
+type FieldStyle = {
+  fontFamily?: string;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+};
+type FieldStyles = Record<string, FieldStyle>;
+
+function styleOf(styles: FieldStyles | undefined, key: string): React.CSSProperties | undefined {
+  const s = styles?.[key];
+  if (!s) return undefined;
+  const css: React.CSSProperties = {};
+  if (s.fontFamily) css.fontFamily = s.fontFamily;
+  if (s.fontSize) css.fontSize = `${s.fontSize}px`;
+  if (s.bold) css.fontWeight = 700;
+  if (s.italic) css.fontStyle = "italic";
+  return Object.keys(css).length ? css : undefined;
+}
+
 function parseSectionOrder(v: unknown): SectionId[] {
   if (!Array.isArray(v)) return DEFAULT_SECTION_ORDER;
   const picked = v.filter(
@@ -128,13 +147,15 @@ function IndexPage() {
 
   void fontsReady;
 
+  const fs = ((home as Record<string, unknown> | undefined)?.field_styles ?? {}) as FieldStyles;
+
   const sections: Record<SectionId, ReactNode> = {
-    hero: <Hero h={home} />,
-    stats: <Stats h={home} />,
-    capabilities: <Capabilities h={home} capabilities={capabilities} />,
-    clients: <Clients h={home} brands={brands} />,
-    advantage: <Advantage h={home} />,
-    cta: <CTA h={home} />,
+    hero: <Hero h={home} fs={fs} />,
+    stats: <Stats h={home} fs={fs} />,
+    capabilities: <Capabilities h={home} capabilities={capabilities} fs={fs} />,
+    clients: <Clients h={home} brands={brands} fs={fs} />,
+    advantage: <Advantage h={home} fs={fs} />,
+    cta: <CTA h={home} fs={fs} />,
   };
 
   return (
@@ -151,7 +172,7 @@ function IndexPage() {
 }
 
 
-function Hero({ h }: { h: HomeData }) {
+function Hero({ h, fs }: { h: HomeData; fs: FieldStyles }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
@@ -168,26 +189,42 @@ function Hero({ h }: { h: HomeData }) {
       </motion.div>
 
       <motion.div style={{ opacity }} className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6 lg:px-10">
-        <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-silver/90">
+        <div
+          className="mb-6 inline-flex w-fit items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-silver/90"
+          style={styleOf(fs, "hero_eyebrow")}
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-mid-blue" />
-          {h?.hero_eyebrow || "Precision Coil Manufacturing"}
+          {h?.hero_eyebrow || "精密线圈制造"}
         </div>
 
         <h1 className="max-w-4xl font-display text-5xl font-bold leading-[1.05] text-white md:text-7xl lg:text-8xl">
-          {h?.hero_title_line1 || "Precision Manufacturing"}
+          <span style={styleOf(fs, "hero_title_line1")}>{h?.hero_title_line1 || "精密制造"}</span>
           <br />
-          {h?.hero_title_line2 || "Built for Scale"}
+          <span style={styleOf(fs, "hero_title_line2")}>{h?.hero_title_line2 || "为规模而生"}</span>
         </h1>
 
-        <p className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg">{h?.hero_intro || ""}</p>
+        <p
+          className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg"
+          style={styleOf(fs, "hero_intro")}
+        >
+          {h?.hero_intro || ""}
+        </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <a href={exploreLink} className="group inline-flex items-center gap-2 bg-mid-blue px-7 py-4 text-sm font-medium text-white hover:bg-mid-blue/90">
-            {h?.btn_explore || "Explore"}
+          <a
+            href={exploreLink}
+            className="group inline-flex items-center gap-2 bg-mid-blue px-7 py-4 text-sm font-medium text-white hover:bg-mid-blue/90"
+            style={styleOf(fs, "btn_explore")}
+          >
+            {h?.btn_explore || "了解产品"}
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </a>
-          <a href={contactLink} className="inline-flex items-center gap-2 border border-white/25 bg-white/5 px-7 py-4 text-sm font-medium text-white">
-            {h?.btn_contact || "Contact"}
+          <a
+            href={contactLink}
+            className="inline-flex items-center gap-2 border border-white/25 bg-white/5 px-7 py-4 text-sm font-medium text-white"
+            style={styleOf(fs, "btn_contact")}
+          >
+            {h?.btn_contact || "联系我们"}
           </a>
         </div>
       </motion.div>
@@ -195,22 +232,22 @@ function Hero({ h }: { h: HomeData }) {
   );
 }
 
-function Stats({ h }: { h: HomeData }) {
+function Stats({ h, fs }: { h: HomeData; fs: FieldStyles }) {
   const stats = [
-    { value: h?.stat1_value ?? 1800, suffix: h?.stat1_suffix ?? "㎡", label: h?.stat1_label ?? "Workshop" },
-    { value: h?.stat2_value ?? 90, suffix: h?.stat2_suffix ?? "+", label: h?.stat2_label ?? "Team" },
-    { value: h?.stat3_value ?? 80, suffix: h?.stat3_suffix ?? "+", label: h?.stat3_label ?? "Machines" },
-    { value: h?.stat4_value ?? 2000, suffix: h?.stat4_suffix ?? "万/月", label: h?.stat4_label ?? "Capacity" },
+    { value: h?.stat1_value ?? 1800, suffix: h?.stat1_suffix ?? "㎡", label: h?.stat1_label ?? "厂房面积" },
+    { value: h?.stat2_value ?? 90, suffix: h?.stat2_suffix ?? "+", label: h?.stat2_label ?? "团队规模" },
+    { value: h?.stat3_value ?? 80, suffix: h?.stat3_suffix ?? "+", label: h?.stat3_label ?? "设备数量" },
+    { value: h?.stat4_value ?? 2000, suffix: h?.stat4_suffix ?? "万/月", label: h?.stat4_label ?? "月产能" },
   ];
 
-  const titleLines = (h?.stats_title || "Manufacturing strength\nat scale").split("\n");
+  const titleLines = (h?.stats_title || "规模化的\n制造实力").split("\n");
 
   return (
     <section className="bg-navy-deep py-24 text-white lg:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal className="mb-16 max-w-2xl">
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.stats_eyebrow || "By the numbers"}</div>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl">
+          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.stats_eyebrow || "数据见证"}</div>
+          <h2 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl" style={styleOf(fs, "stats_title")}>
             {titleLines.map((l, i) => (
               <span key={i}>
                 {l}
@@ -239,19 +276,26 @@ function Stats({ h }: { h: HomeData }) {
 function Capabilities({
   h,
   capabilities,
+  fs,
 }: {
   h: HomeData;
   capabilities: { id: string; title: string; description: string; icon: string }[];
+  fs: FieldStyles;
 }) {
   return (
     <section className="bg-background py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal className="mb-16">
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.capabilities_eyebrow || "Core Capabilities"}</div>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl">
-            {h?.capabilities_title || "Capabilities"}
+          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.capabilities_eyebrow || "核心能力"}</div>
+          <h2
+            className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl"
+            style={styleOf(fs, "capabilities_title")}
+          >
+            {h?.capabilities_title || "我们的能力"}
           </h2>
-          <p className="mt-3 max-w-md text-base text-muted-foreground">{h?.capabilities_desc || ""}</p>
+          <p className="mt-3 max-w-md text-base text-muted-foreground" style={styleOf(fs, "capabilities_desc")}>
+            {h?.capabilities_desc || ""}
+          </p>
         </Reveal>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -271,14 +315,19 @@ function Capabilities({
   );
 }
 
-function Clients({ h, brands }: { h: HomeData; brands: string[] }) {
+function Clients({ h, brands, fs }: { h: HomeData; brands: string[]; fs: FieldStyles }) {
   return (
     <section className="bg-silver/40 py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal>
           <div className="text-center">
-            <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.clients_eyebrow || "Trusted Partners"}</div>
-            <h2 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl">{h?.clients_title || "Clients"}</h2>
+            <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.clients_eyebrow || "合作伙伴"}</div>
+            <h2
+              className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl"
+              style={styleOf(fs, "clients_title")}
+            >
+              {h?.clients_title || "服务客户"}
+            </h2>
           </div>
         </Reveal>
 
@@ -294,18 +343,20 @@ function Clients({ h, brands }: { h: HomeData; brands: string[] }) {
   );
 }
 
-function Advantage({ h }: { h: HomeData }) {
+function Advantage({ h, fs }: { h: HomeData; fs: FieldStyles }) {
   const items = [
     {
+      key: "adv1",
       img: h?.adv1_image || workshopImg,
-      tag: h?.adv1_tag || "Line",
-      title: h?.adv1_title || "Automated line",
+      tag: h?.adv1_tag || "产线",
+      title: h?.adv1_title || "自动化产线",
       desc: h?.adv1_desc || "",
     },
     {
+      key: "adv2",
       img: h?.adv2_image || qualityImg,
-      tag: h?.adv2_tag || "Quality",
-      title: h?.adv2_title || "Quality control",
+      tag: h?.adv2_tag || "品质",
+      title: h?.adv2_title || "品质管控",
       desc: h?.adv2_desc || "",
     },
   ];
@@ -314,33 +365,45 @@ function Advantage({ h }: { h: HomeData }) {
     <section className="bg-background py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal className="mb-20 max-w-3xl">
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.advantage_eyebrow || "Our Advantage"}</div>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl">{h?.advantage_title || "Advantage"}</h2>
+          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.advantage_eyebrow || "我们的优势"}</div>
+          <h2
+            className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl"
+            style={styleOf(fs, "advantage_title")}
+          >
+            {h?.advantage_title || "核心优势"}
+          </h2>
         </Reveal>
 
         <div className="space-y-24 lg:space-y-32">
           {items.map((item, idx) => (
-            <div key={idx} className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${idx % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+            <div key={item.key} className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${idx % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
               <div className="relative overflow-hidden">
                 <img src={item.img} alt={item.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
               </div>
               <div>
                 <div className="text-xs uppercase tracking-[0.25em] text-mid-blue">{item.tag}</div>
-                <h3 className="mt-4 font-display text-3xl font-bold text-navy-deep md:text-4xl">{item.title}</h3>
-                <p className="mt-6 text-base text-muted-foreground">{item.desc}</p>
+                <h3
+                  className="mt-4 font-display text-3xl font-bold text-navy-deep md:text-4xl"
+                  style={styleOf(fs, `${item.key}_title`)}
+                >
+                  {item.title}
+                </h3>
+                <p className="mt-6 text-base text-muted-foreground" style={styleOf(fs, `${item.key}_desc`)}>
+                  {item.desc}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
         <Reveal className="mt-24 grid grid-cols-2 gap-6 md:grid-cols-3">
-          <ProductMini img={coilImg} title="Precision Coil" />
-          <ProductMini img={motorImg} title="Linear Motor" />
+          <ProductMini img={coilImg} title="精密线圈" />
+          <ProductMini img={motorImg} title="直线电机" />
           <div className="flex flex-col items-start justify-end bg-navy-deep p-8 text-white">
-            <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">Products</div>
-            <h4 className="mt-2 font-display text-2xl font-bold">View all products</h4>
+            <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">产品</div>
+            <h4 className="mt-2 font-display text-2xl font-bold">查看全部产品</h4>
             <Link to="/products" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-silver hover:text-white">
-              Go to products <ArrowRight size={14} />
+              前往产品页 <ArrowRight size={14} />
             </Link>
           </div>
         </Reveal>
@@ -361,16 +424,16 @@ function ProductMini({ img, title }: { img: string; title: string }) {
   );
 }
 
-function CTA({ h }: { h: HomeData }) {
+function CTA({ h, fs }: { h: HomeData; fs: FieldStyles }) {
   const ctaLink = h?.cta_button_link || "/contact";
-  const titleLines = (h?.cta_title || "Let us support your next project").split("\n");
+  const titleLines = (h?.cta_title || "让我们助力您的下一个项目").split("\n");
 
   return (
     <section className="relative overflow-hidden bg-navy-gradient py-24 text-white lg:py-32">
       <div className="relative mx-auto max-w-5xl px-6 text-center lg:px-10">
         <Reveal>
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.cta_eyebrow || "Let's Build Together"}</div>
-          <h2 className="mt-6 font-display text-4xl font-bold leading-tight md:text-6xl">
+          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{h?.cta_eyebrow || "携手共建"}</div>
+          <h2 className="mt-6 font-display text-4xl font-bold leading-tight md:text-6xl" style={styleOf(fs, "cta_title")}>
             {titleLines.map((line, idx) => (
               <span key={idx}>
                 {line}
@@ -378,9 +441,15 @@ function CTA({ h }: { h: HomeData }) {
               </span>
             ))}
           </h2>
-          <p className="mx-auto mt-8 max-w-2xl text-base text-silver/80">{h?.cta_desc || ""}</p>
-          <a href={ctaLink} className="mt-10 inline-flex items-center gap-2 bg-white px-8 py-4 text-sm font-medium text-navy-deep hover:bg-silver">
-            {h?.cta_button || "Contact us"} <ArrowRight size={16} />
+          <p className="mx-auto mt-8 max-w-2xl text-base text-silver/80" style={styleOf(fs, "cta_desc")}>
+            {h?.cta_desc || ""}
+          </p>
+          <a
+            href={ctaLink}
+            className="mt-10 inline-flex items-center gap-2 bg-white px-8 py-4 text-sm font-medium text-navy-deep hover:bg-silver"
+            style={styleOf(fs, "cta_button")}
+          >
+            {h?.cta_button || "联系我们"} <ArrowRight size={16} />
           </a>
         </Reveal>
       </div>
