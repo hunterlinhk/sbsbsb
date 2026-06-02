@@ -17,6 +17,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
+import { Route as AdminPuckHomeRouteImport } from './routes/admin/puck/home'
 import { Route as AdminLiveEditorHomeRouteImport } from './routes/admin/live-editor/home'
 
 const ProductsRoute = ProductsRouteImport.update({
@@ -59,6 +60,11 @@ const NewsIdRoute = NewsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => NewsRoute,
 } as any)
+const AdminPuckHomeRoute = AdminPuckHomeRouteImport.update({
+  id: '/admin/puck/home',
+  path: '/admin/puck/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLiveEditorHomeRoute = AdminLiveEditorHomeRouteImport.update({
   id: '/admin/live-editor/home',
   path: '/admin/live-editor/home',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
+  '/admin/puck/home': typeof AdminPuckHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/news/$id': typeof NewsIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
+  '/admin/puck/home': typeof AdminPuckHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/news/$id': typeof NewsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
+  '/admin/puck/home': typeof AdminPuckHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin/'
     | '/admin/live-editor/home'
+    | '/admin/puck/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin'
     | '/admin/live-editor/home'
+    | '/admin/puck/home'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/news/$id'
     | '/admin/'
     | '/admin/live-editor/home'
+    | '/admin/puck/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
+  AdminPuckHomeRoute: typeof AdminPuckHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIdRouteImport
       parentRoute: typeof NewsRoute
     }
+    '/admin/puck/home': {
+      id: '/admin/puck/home'
+      path: '/admin/puck/home'
+      fullPath: '/admin/puck/home'
+      preLoaderRoute: typeof AdminPuckHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/live-editor/home': {
       id: '/admin/live-editor/home'
       path: '/admin/live-editor/home'
@@ -233,7 +253,18 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
+  AdminPuckHomeRoute: AdminPuckHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
