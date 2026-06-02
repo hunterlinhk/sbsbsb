@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Puck, Render, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
-import { puckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
+import { buildPuckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
 import { getAdminToken } from "@/lib/admin-auth";
 import { getHomePuckData, saveHomePuckData, uploadFont } from "@/lib/site.functions";
 
@@ -204,7 +204,13 @@ export function PuckHomeEditor() {
   }, [fonts]);
 
   const fontListText = useMemo(
-    () => (fonts.length === 0 ? "暂无自定义字体，上传后可在区块字段中填写字体名称使用。" : ""),
+    () => (fonts.length === 0 ? "暂无自定义字体，上传后会自动出现在下方区块的字体下拉菜单中。" : ""),
+    [fonts],
+  );
+
+  // 构建包含自定义字体的 Puck config（下拉菜单会包含已上传字体）
+  const dynamicConfig = useMemo(
+    () => buildPuckConfig(fonts.map((f) => ({ label: f.name, value: `"${f.name}"` }))),
     [fonts],
   );
 
@@ -325,7 +331,7 @@ export function PuckHomeEditor() {
           </ul>
         )}
         <p className="mt-3 text-xs text-mid-blue">
-          在每个区块的"标题字体 / 正文字体"字段中填写上方字体名称即可应用。
+          上传后，字体会自动出现在每个区块的"标题字体 / 正文字体"下拉菜单中（标记为"自定义"）。
         </p>
       </div>
 
@@ -335,7 +341,7 @@ export function PuckHomeEditor() {
         style={{ height: "90vh", minHeight: 820 }}
       >
         <Puck
-          config={puckConfig}
+          config={dynamicConfig}
           data={initialData}
           onChange={handleChange}
           onPublish={handleSaveDraft}
@@ -343,7 +349,7 @@ export function PuckHomeEditor() {
             puck: ({ children }) => <div className="h-full">{children}</div>,
           }}
           headerTitle="首页拖拽编辑器"
-          headerPath="点击右上角保存草稿 / 发布到首页"
+          headerPath="点击画布中的区块即可在右侧编辑文字、字体、粗体/斜体、图片"
         />
       </div>
 
@@ -354,7 +360,7 @@ export function PuckHomeEditor() {
         </summary>
         <p className="mt-2 text-xs text-muted-foreground">该预览即发布后线上首页的样子</p>
         <div className="mt-3 overflow-hidden rounded-sm border border-border">
-          {previewData && <Render config={puckConfig} data={previewData} />}
+          {previewData && <Render config={dynamicConfig} data={previewData} />}
         </div>
       </details>
     </div>
