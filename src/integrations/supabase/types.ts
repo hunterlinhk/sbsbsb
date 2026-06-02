@@ -210,6 +210,7 @@ export type Database = {
           hero_title_line1: string | null
           hero_title_line2: string | null
           id: number
+          puck_data: Json | null
           section_order: Json | null
           section_visibility: Json | null
           stat1_label: string | null
@@ -261,6 +262,7 @@ export type Database = {
           hero_title_line1?: string | null
           hero_title_line2?: string | null
           id?: number
+          puck_data?: Json | null
           section_order?: Json | null
           section_visibility?: Json | null
           stat1_label?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           hero_title_line1?: string | null
           hero_title_line2?: string | null
           id?: number
+          puck_data?: Json | null
           section_order?: Json | null
           section_visibility?: Json | null
           stat1_label?: string | null
