@@ -70,6 +70,34 @@ function IndexPage() {
   const home = data?.home;
   const capabilities = data?.capabilities ?? [];
   const brands = (home?.brands as string[] | undefined) ?? DEFAULT_BRANDS;
+  const puckData = (home as Record<string, unknown> | undefined)?.puck_data;
+
+  // Load custom fonts saved in localStorage by the Puck editor (best-effort, browser-only).
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("custom-fonts");
+      if (raw) {
+        const fonts = JSON.parse(raw);
+        if (Array.isArray(fonts)) {
+          const styleId = "site-custom-fonts";
+          let el = document.getElementById(styleId) as HTMLStyleElement | null;
+          if (!el) {
+            el = document.createElement("style");
+            el.id = styleId;
+            document.head.appendChild(el);
+          }
+          el.textContent = fonts
+            .filter((f) => f && typeof f.name === "string" && typeof f.url === "string")
+            .map((f) => `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`)
+            .join("\n");
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setFontsReady(true);
+  }, []);
 
   const sectionOrder = useMemo(
     () => parseSectionOrder((home as Record<string, unknown> | undefined)?.section_order),
@@ -79,6 +107,26 @@ function IndexPage() {
     () => parseSectionVisibility((home as Record<string, unknown> | undefined)?.section_visibility),
     [home],
   );
+
+  // If a valid Puck data blob exists, render it instead of the legacy sections.
+  if (isValidPuckData(puckData)) {
+    try {
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <main>
+            <Render config={puckConfig} data={puckData} />
+          </main>
+          <Footer />
+        </div>
+      );
+    } catch (e) {
+      console.warn("[Home] Puck render failed, falling back to legacy sections", e);
+      // fall through to legacy render below
+    }
+  }
+
+  void fontsReady;
 
   const sections: Record<SectionId, ReactNode> = {
     hero: <Hero h={home} />,
@@ -101,6 +149,7 @@ function IndexPage() {
     </div>
   );
 }
+
 
 function Hero({ h }: { h: HomeData }) {
   const ref = useRef<HTMLDivElement>(null);
