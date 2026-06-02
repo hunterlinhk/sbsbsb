@@ -60,9 +60,9 @@ const NewsIdRoute = NewsIdRouteImport.update({
   getParentRoute: () => NewsRoute,
 } as any)
 const AdminLiveEditorHomeRoute = AdminLiveEditorHomeRouteImport.update({
-  id: '/live-editor/home',
-  path: '/live-editor/home',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/live-editor/home',
+  path: '/admin/live-editor/home',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -143,6 +143,7 @@ export interface RootRouteChildren {
   NewsRoute: typeof NewsRouteWithChildren
   ProductsRoute: typeof ProductsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,10 +206,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/live-editor/home': {
       id: '/admin/live-editor/home'
-      path: '/live-editor/home'
+      path: '/admin/live-editor/home'
       fullPath: '/admin/live-editor/home'
       preLoaderRoute: typeof AdminLiveEditorHomeRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -231,17 +232,8 @@ const rootRouteChildren: RootRouteChildren = {
   NewsRoute: NewsRouteWithChildren,
   ProductsRoute: ProductsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

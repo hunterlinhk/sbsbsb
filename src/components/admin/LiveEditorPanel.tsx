@@ -331,6 +331,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
       <div className="xl:col-span-2">
         <SaveBar saving={saving} onSave={save} label="Save Live Editor Changes" />
       </div>
+      </div>
     </div>
   );
 }
