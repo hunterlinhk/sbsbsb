@@ -931,12 +931,15 @@ export function LiveEditorPanel({ token }: { token: string }) {
               <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
                 {String(form.clients_eyebrow ?? "合作伙伴")}
               </div>
-              <h3
+              <EditableText
+                fieldKey="clients_title"
+                value={String(form.clients_title ?? "服务客户")}
+                onChange={(v) => setValue("clients_title", v)}
+                onSelect={() => setSelectedField("clients_title")}
+                as="h3"
                 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl"
                 style={styleOf(fieldStyles, "clients_title")}
-              >
-                {String(form.clients_title ?? "服务客户")}
-              </h3>
+              />
             </div>
             <div className="mt-8 grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-6">
               {brands.map((brand, index) => (
