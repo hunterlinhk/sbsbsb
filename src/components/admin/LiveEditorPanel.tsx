@@ -180,6 +180,7 @@ function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
   else if (s.bold) css.fontWeight = 700;
   if (s.italic === "italic") css.fontStyle = "italic";
   else if (s.italic === "normal") css.fontStyle = "normal";
+  if (s.color) css.color = s.color;
   return Object.keys(css).length ? css : undefined;
 }
 
