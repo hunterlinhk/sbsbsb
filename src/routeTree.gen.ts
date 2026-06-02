@@ -13,9 +13,9 @@ import { Route as ProductsRouteImport } from './routes/products'
 import { Route as NewsRouteImport } from './routes/news'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as AdminLiveEditorHomeRouteImport } from './routes/admin/live-editor/home'
 
@@ -39,11 +39,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -54,49 +49,54 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewsIdRoute = NewsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => NewsRoute,
 } as any)
 const AdminLiveEditorHomeRoute = AdminLiveEditorHomeRouteImport.update({
-  id: '/live-editor/home',
-  path: '/live-editor/home',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/live-editor/home',
+  path: '/admin/live-editor/home',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRoute
   '/news/$id': typeof NewsIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRoute
   '/news/$id': typeof NewsIdRoute
+  '/admin': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRoute
   '/news/$id': typeof NewsIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
 }
 export interface FileRouteTypes {
@@ -104,45 +104,46 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/login'
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/admin/'
     | '/admin/live-editor/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/login'
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/admin'
     | '/admin/live-editor/home'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/admin'
     | '/contact'
     | '/login'
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/admin/'
     | '/admin/live-editor/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   NewsRoute: typeof NewsRouteWithChildren
   ProductsRoute: typeof ProductsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -175,13 +176,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -196,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/news/$id': {
       id: '/news/$id'
       path: '/$id'
@@ -205,23 +206,13 @@ declare module '@tanstack/react-router' {
     }
     '/admin/live-editor/home': {
       id: '/admin/live-editor/home'
-      path: '/live-editor/home'
+      path: '/admin/live-editor/home'
       fullPath: '/admin/live-editor/home'
       preLoaderRoute: typeof AdminLiveEditorHomeRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface AdminRouteChildren {
-  AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface NewsRouteChildren {
   NewsIdRoute: typeof NewsIdRoute
@@ -236,11 +227,12 @@ const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   NewsRoute: NewsRouteWithChildren,
   ProductsRoute: ProductsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
