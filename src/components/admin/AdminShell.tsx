@@ -105,6 +105,17 @@ export function AdminShell({
             >
               <PanelsTopLeft size={16} /> 可视化编辑
             </Link>
+
+            <Link
+              to="/admin/puck/home"
+              className={`flex w-full items-center gap-3 border-l-2 px-4 py-3 text-sm transition-colors ${
+                puckActive
+                  ? "border-navy-deep bg-white font-medium text-navy-deep"
+                  : "border-transparent text-muted-foreground hover:bg-white hover:text-navy-deep"
+              }`}
+            >
+              <PanelsTopLeft size={16} /> 拖拽编辑器
+            </Link>
           </nav>
         </aside>
 
