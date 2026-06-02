@@ -204,7 +204,13 @@ export function PuckHomeEditor() {
   }, [fonts]);
 
   const fontListText = useMemo(
-    () => (fonts.length === 0 ? "暂无自定义字体，上传后可在区块字段中填写字体名称使用。" : ""),
+    () => (fonts.length === 0 ? "暂无自定义字体，上传后会自动出现在下方区块的字体下拉菜单中。" : ""),
+    [fonts],
+  );
+
+  // 构建包含自定义字体的 Puck config（下拉菜单会包含已上传字体）
+  const dynamicConfig = useMemo(
+    () => buildPuckConfig(fonts.map((f) => ({ label: f.name, value: `"${f.name}"` }))),
     [fonts],
   );
 
