@@ -35,6 +35,25 @@ const ICONS: Record<string, LucideIcon> = { Cpu, Zap, Factory, ShieldCheck };
 const DEFAULT_SECTION_ORDER: SectionId[] = ["hero", "stats", "capabilities", "clients", "advantage", "cta"];
 const DEFAULT_BRANDS = ["SAMSUNG", "HUAWEI", "XIAOMI", "TRANSSION", "OPPO", "VIVO"];
 
+type FieldStyle = {
+  fontFamily?: string;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+};
+type FieldStyles = Record<string, FieldStyle>;
+
+function styleOf(styles: FieldStyles | undefined, key: string): React.CSSProperties | undefined {
+  const s = styles?.[key];
+  if (!s) return undefined;
+  const css: React.CSSProperties = {};
+  if (s.fontFamily) css.fontFamily = s.fontFamily;
+  if (s.fontSize) css.fontSize = `${s.fontSize}px`;
+  if (s.bold) css.fontWeight = 700;
+  if (s.italic) css.fontStyle = "italic";
+  return Object.keys(css).length ? css : undefined;
+}
+
 function parseSectionOrder(v: unknown): SectionId[] {
   if (!Array.isArray(v)) return DEFAULT_SECTION_ORDER;
   const picked = v.filter(
