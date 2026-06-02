@@ -217,7 +217,16 @@ export function PuckHomeEditor() {
       <style>{`
         /* Make Puck preview elements feel clickable */
         .puck-preview-hover [data-puck-component]:hover { outline: 2px dashed #3b82f6; outline-offset: 2px; cursor: pointer; }
+        /* Ensure Puck内部左右侧栏可独立滚动，避免 outline / 字段面板被截断 */
+        .puck-editor-shell .Puck { height: 100% !important; }
+        .puck-editor-shell .Puck-sideBar,
+        .puck-editor-shell .Puck-leftSideBar,
+        .puck-editor-shell .Puck-rightSideBar { overflow-y: auto !important; max-height: 100%; }
+        .puck-editor-shell [class*="PuckLayout-leftSideBar"],
+        .puck-editor-shell [class*="PuckLayout-rightSideBar"] { overflow-y: auto !important; }
+        .puck-editor-shell [class*="SidebarSection"] { overflow: visible; }
       `}</style>
+
 
       <div className="rounded-sm border border-border bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -322,8 +331,8 @@ export function PuckHomeEditor() {
 
       {/* Puck editor */}
       <div
-        className="overflow-hidden rounded-sm border border-border bg-white puck-preview-hover"
-        style={{ height: "calc(100vh - 160px)", minHeight: 700 }}
+        className="puck-editor-shell overflow-hidden rounded-sm border border-border bg-white puck-preview-hover"
+        style={{ height: "90vh", minHeight: 820 }}
       >
         <Puck
           config={puckConfig}
@@ -338,16 +347,16 @@ export function PuckHomeEditor() {
         />
       </div>
 
-      {/* Render preview */}
-      <div className="rounded-sm border border-border bg-white p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-navy-deep">渲染预览（最近一次保存）</h3>
-          <span className="text-xs text-muted-foreground">该预览即发布后线上首页的样子</span>
-        </div>
-        <div className="overflow-hidden rounded-sm border border-border">
+      {/* Render preview (collapsible so it doesn't crowd editor panels) */}
+      <details className="rounded-sm border border-border bg-white p-4">
+        <summary className="cursor-pointer text-sm font-bold text-navy-deep">
+          渲染预览（最近一次保存） — 点击展开/收起
+        </summary>
+        <p className="mt-2 text-xs text-muted-foreground">该预览即发布后线上首页的样子</p>
+        <div className="mt-3 overflow-hidden rounded-sm border border-border">
           {previewData && <Render config={puckConfig} data={previewData} />}
         </div>
-      </div>
+      </details>
     </div>
   );
 }
