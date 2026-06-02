@@ -217,7 +217,16 @@ export function PuckHomeEditor() {
       <style>{`
         /* Make Puck preview elements feel clickable */
         .puck-preview-hover [data-puck-component]:hover { outline: 2px dashed #3b82f6; outline-offset: 2px; cursor: pointer; }
+        /* Ensure Puck内部左右侧栏可独立滚动，避免 outline / 字段面板被截断 */
+        .puck-editor-shell .Puck { height: 100% !important; }
+        .puck-editor-shell .Puck-sideBar,
+        .puck-editor-shell .Puck-leftSideBar,
+        .puck-editor-shell .Puck-rightSideBar { overflow-y: auto !important; max-height: 100%; }
+        .puck-editor-shell [class*="PuckLayout-leftSideBar"],
+        .puck-editor-shell [class*="PuckLayout-rightSideBar"] { overflow-y: auto !important; }
+        .puck-editor-shell [class*="SidebarSection"] { overflow: visible; }
       `}</style>
+
 
       <div className="rounded-sm border border-border bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
