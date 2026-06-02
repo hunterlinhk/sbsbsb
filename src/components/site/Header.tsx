@@ -13,14 +13,15 @@ export function Header() {
     queryFn: () => getSiteSettings(),
     staleTime: 60_000,
   });
+
   const s = data?.item;
   const logoUrl = s?.logo_url || defaultLogo;
   const links = [
-    { to: "/", label: s?.nav_home || "首页" },
-    { to: "/products", label: s?.nav_products || "产品中心" },
-    { to: "/news", label: s?.nav_news || "新闻资讯" },
-    { to: "/about", label: s?.nav_about || "关于我们" },
-    { to: "/contact", label: s?.nav_contact || "联系我们" },
+    { to: "/", label: s?.nav_home || "Home" },
+    { to: "/products", label: s?.nav_products || "Products" },
+    { to: "/news", label: s?.nav_news || "News" },
+    { to: "/about", label: s?.nav_about || "About" },
+    { to: "/contact", label: s?.nav_contact || "Contact" },
   ] as const;
 
   useEffect(() => {
@@ -33,30 +34,30 @@ export function Header() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled ? "bg-navy-deep/85 backdrop-blur-md border-b border-white/10" : "bg-transparent"
+        scrolled ? "border-b border-white/10 bg-navy-deep/85 backdrop-blur-md" : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:h-20 lg:px-10">
-        <Link to="/" className="flex items-center group">
+        <Link to="/" className="flex items-center">
           <img
             src={logoUrl}
-            alt={s?.company_name || "景鸿科技"}
-            className="h-10 w-auto lg:h-12 bg-white/95 px-2 py-1 rounded-sm"
+            alt={s?.company_name || "Logo"}
+            className="h-10 w-auto max-w-[10rem] object-contain lg:h-12 lg:max-w-[12rem]"
           />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {links.map((l) => (
+          {links.map((link) => (
             <Link
-              key={l.to}
-              to={l.to}
+              key={link.to}
+              to={link.to}
               className="relative px-4 py-2 text-sm font-medium text-silver/80 transition-colors hover:text-white"
               activeProps={{ className: "text-white" }}
-              activeOptions={{ exact: l.to === "/" }}
+              activeOptions={{ exact: link.to === "/" }}
             >
               {({ isActive }) => (
                 <>
-                  {l.label}
+                  {link.label}
                   <span
                     className={`absolute inset-x-4 -bottom-0.5 h-px bg-mid-blue transition-transform duration-300 ${
                       isActive ? "scale-x-100" : "scale-x-0"
@@ -72,7 +73,7 @@ export function Header() {
           to="/contact"
           className="hidden rounded-sm border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white backdrop-blur transition-all hover:border-mid-blue hover:bg-mid-blue/20 lg:inline-flex"
         >
-          {s?.nav_cta || "获取报价"} →
+          {s?.nav_cta || "Get Quote"} {"->"}
         </Link>
 
         <button onClick={() => setOpen(!open)} className="text-white lg:hidden" aria-label="Toggle menu">
@@ -81,17 +82,17 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="lg:hidden bg-navy-deep/95 backdrop-blur-xl border-t border-white/10">
+        <div className="border-t border-white/10 bg-navy-deep/95 backdrop-blur-xl lg:hidden">
           <nav className="flex flex-col px-6 py-4">
-            {links.map((l) => (
+            {links.map((link) => (
               <Link
-                key={l.to}
-                to={l.to}
+                key={link.to}
+                to={link.to}
                 onClick={() => setOpen(false)}
-                className="py-3 text-base font-medium text-silver/80 border-b border-white/5"
+                className="border-b border-white/5 py-3 text-base font-medium text-silver/80"
                 activeProps={{ className: "text-white" }}
               >
-                {l.label}
+                {link.label}
               </Link>
             ))}
           </nav>

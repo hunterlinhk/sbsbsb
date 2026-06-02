@@ -4,6 +4,14 @@ import { toast } from "sonner";
 import { uploadImage } from "@/lib/site.functions";
 import { getAdminToken } from "@/lib/admin-auth";
 
+const checkerboardStyle = {
+  backgroundColor: "#0f172a",
+  backgroundImage:
+    "linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.08) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.08) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.08) 75%)",
+  backgroundSize: "20px 20px",
+  backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0",
+} as const;
+
 export function ImageUpload({
   value,
   onChange,
@@ -17,31 +25,33 @@ export function ImageUpload({
   const [busy, setBusy] = useState(false);
 
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) {
-      toast.error("图片大小不能超过 5MB");
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be smaller than 5MB");
       return;
     }
+
     setBusy(true);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => {
-          const s = String(r.result);
-          resolve(s.split(",")[1] || "");
+      const encodedImage = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result);
+          resolve(result.split(",")[1] || "");
         };
-        r.onerror = reject;
-        r.readAsDataURL(f);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-      const token = getAdminToken() || "";
+
+      const authToken = getAdminToken() || "";
       const res = await uploadImage({
-        data: { password: token, filename: f.name, contentType: f.type || "image/jpeg", base64 },
+        data: { ["password"]: authToken, filename: file.name, contentType: file.type || "image/jpeg", base64: encodedImage },
       });
       onChange(res.url);
-      toast.success("图片已上传");
+      toast.success("Image uploaded");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "上传失败");
+      toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setBusy(false);
       if (ref.current) ref.current.value = "";
@@ -56,7 +66,12 @@ export function ImageUpload({
       <div className="flex flex-wrap items-start gap-3">
         {value ? (
           <div className="relative">
-            <img src={value} alt="" className="h-24 w-24 border border-border object-cover" />
+            <div
+              className="flex h-24 w-24 items-center justify-center overflow-hidden border border-border p-2"
+              style={checkerboardStyle}
+            >
+              <img src={value} alt="" className="h-full w-full object-contain" />
+            </div>
             <button
               type="button"
               onClick={() => onChange("")}
@@ -66,6 +81,7 @@ export function ImageUpload({
             </button>
           </div>
         ) : null}
+
         <button
           type="button"
           onClick={() => ref.current?.click()}
@@ -73,21 +89,17 @@ export function ImageUpload({
           className="inline-flex h-24 min-w-[6rem] flex-col items-center justify-center gap-1 border border-dashed border-border bg-white px-4 text-xs text-muted-foreground hover:border-navy-deep disabled:opacity-50"
         >
           <Upload size={16} />
-          {busy ? "上传中..." : value ? "替换图片" : "上传图片"}
+          {busy ? "Uploading..." : value ? "Replace image" : "Upload image"}
         </button>
-        <input
-          ref={ref}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={onPick}
-        />
+
+        <input ref={ref} type="file" accept="image/*" className="hidden" onChange={onPick} />
       </div>
+
       <input
         type="url"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="或填写图片 URL"
+        placeholder="Or paste an image URL"
         className="w-full border border-border bg-white px-3 py-2 text-xs text-navy-deep outline-none focus:border-mid-blue"
       />
     </div>
