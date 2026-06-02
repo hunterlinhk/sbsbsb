@@ -760,40 +760,70 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="relative z-10 px-6 py-14 text-white md:px-8 md:py-20">
               <div
                 className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-silver/90"
-                style={styleOf(fieldStyles, "hero_eyebrow")}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-mid-blue" />
-                {String(form.hero_eyebrow ?? "精密线圈制造")}
+                <EditableText
+                  fieldKey="hero_eyebrow"
+                  value={String(form.hero_eyebrow ?? "精密线圈制造")}
+                  onChange={(v) => setValue("hero_eyebrow", v)}
+                  onSelect={() => setSelectedField("hero_eyebrow")}
+                  as="span"
+                  style={styleOf(fieldStyles, "hero_eyebrow")}
+                />
               </div>
               <h3 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[1.02] md:text-5xl">
-                <span style={styleOf(fieldStyles, "hero_title_line1")}>
-                  {String(form.hero_title_line1 ?? "精密制造")}
-                </span>
+                <EditableText
+                  fieldKey="hero_title_line1"
+                  value={String(form.hero_title_line1 ?? "精密制造")}
+                  onChange={(v) => setValue("hero_title_line1", v)}
+                  onSelect={() => setSelectedField("hero_title_line1")}
+                  as="span"
+                  style={styleOf(fieldStyles, "hero_title_line1")}
+                />
                 <br />
-                <span className="text-silver" style={styleOf(fieldStyles, "hero_title_line2")}>
-                  {String(form.hero_title_line2 ?? "为规模而生")}
-                </span>
+                <EditableText
+                  fieldKey="hero_title_line2"
+                  value={String(form.hero_title_line2 ?? "为规模而生")}
+                  onChange={(v) => setValue("hero_title_line2", v)}
+                  onSelect={() => setSelectedField("hero_title_line2")}
+                  as="span"
+                  className="text-silver"
+                  style={styleOf(fieldStyles, "hero_title_line2")}
+                />
               </h3>
-              <p
+              <EditableText
+                fieldKey="hero_intro"
+                value={String(form.hero_intro ?? "")}
+                onChange={(v) => setValue("hero_intro", v)}
+                onSelect={() => setSelectedField("hero_intro")}
+                multiline
+                as="p"
                 className="mt-5 max-w-2xl text-sm leading-relaxed text-silver/80 md:text-base"
                 style={styleOf(fieldStyles, "hero_intro")}
-              >
-                {String(form.hero_intro ?? "")}
-              </p>
+              />
               <div className="mt-7 flex flex-wrap gap-3">
                 <span
                   className="inline-flex items-center gap-2 bg-mid-blue px-5 py-3 text-xs font-medium text-white"
-                  style={styleOf(fieldStyles, "btn_explore")}
                 >
-                  {String(form.btn_explore ?? "了解产品")}
+                  <EditableText
+                    fieldKey="btn_explore"
+                    value={String(form.btn_explore ?? "了解产品")}
+                    onChange={(v) => setValue("btn_explore", v)}
+                    onSelect={() => setSelectedField("btn_explore")}
+                    as="span"
+                    style={styleOf(fieldStyles, "btn_explore")}
+                  />
                   <ArrowRight size={14} />
                 </span>
-                <span
+                <EditableText
+                  fieldKey="btn_contact"
+                  value={String(form.btn_contact ?? "联系我们")}
+                  onChange={(v) => setValue("btn_contact", v)}
+                  onSelect={() => setSelectedField("btn_contact")}
+                  as="span"
                   className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-5 py-3 text-xs font-medium text-white"
                   style={styleOf(fieldStyles, "btn_contact")}
-                >
-                  {String(form.btn_contact ?? "联系我们")}
-                </span>
+                />
               </div>
             </div>
           </section>
