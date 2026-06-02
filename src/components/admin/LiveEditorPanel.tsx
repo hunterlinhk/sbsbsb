@@ -1062,28 +1062,37 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.cta_eyebrow ?? "携手共建")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="cta_title"
+              value={String(form.cta_title ?? "让我们助力您的下一个项目")}
+              onChange={(v) => setValue("cta_title", v)}
+              onSelect={() => setSelectedField("cta_title")}
+              multiline
+              as="h3"
               className="mt-5 font-display text-3xl font-bold leading-tight md:text-4xl"
               style={styleOf(fieldStyles, "cta_title")}
-            >
-              {splitLines(form.cta_title, "让我们助力您的下一个项目").map((line, index, lines) => (
-                <span key={`${line}-${index}`}>
-                  {line}
-                  {index < lines.length - 1 && <br />}
-                </span>
-              ))}
-            </h3>
-            <p
+            />
+            <EditableText
+              fieldKey="cta_desc"
+              value={String(form.cta_desc ?? "")}
+              onChange={(v) => setValue("cta_desc", v)}
+              onSelect={() => setSelectedField("cta_desc")}
+              multiline
+              as="p"
               className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-silver/80"
               style={styleOf(fieldStyles, "cta_desc")}
-            >
-              {String(form.cta_desc ?? "")}
-            </p>
+            />
             <span
               className="mt-7 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-medium text-navy-deep"
-              style={styleOf(fieldStyles, "cta_button")}
             >
-              {String(form.cta_button ?? "联系我们")}
+              <EditableText
+                fieldKey="cta_button"
+                value={String(form.cta_button ?? "联系我们")}
+                onChange={(v) => setValue("cta_button", v)}
+                onSelect={() => setSelectedField("cta_button")}
+                as="span"
+                style={styleOf(fieldStyles, "cta_button")}
+              />
               <ArrowRight size={14} />
             </span>
           </div>
