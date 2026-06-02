@@ -39,12 +39,14 @@ export function AdminShell({
   title,
   activeTab,
   liveEditorActive = false,
+  puckActive = false,
   onSelectTab,
   children,
 }: {
   title: string;
   activeTab?: AdminTabId;
   liveEditorActive?: boolean;
+  puckActive?: boolean;
   onSelectTab?: (tab: AdminTabId) => void;
   children: ReactNode;
 }) {
