@@ -77,7 +77,7 @@ function IndexPage() {
     [home],
   );
 
-  const sections: Record<SectionId, JSX.Element> = {
+  const sections: Record<SectionId, ReactNode> = {
     hero: <Hero h={home} />,
     stats: <Stats h={home} />,
     capabilities: <Capabilities h={home} capabilities={capabilities} />,
