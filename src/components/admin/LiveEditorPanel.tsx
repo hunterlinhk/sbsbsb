@@ -985,12 +985,16 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.advantage_eyebrow ?? "我们的优势")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="advantage_title"
+              value={String(form.advantage_title ?? "核心优势")}
+              onChange={(v) => setValue("advantage_title", v)}
+              onSelect={() => setSelectedField("advantage_title")}
+              multiline
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
               style={styleOf(fieldStyles, "advantage_title")}
-            >
-              {String(form.advantage_title ?? "核心优势")}
-            </h3>
+            />
             <div className="mt-8 space-y-10">
               {items.map((item, index) => (
                 <div key={item.key} className="grid gap-6 lg:grid-cols-2 lg:items-center">
@@ -999,18 +1003,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.25em] text-mid-blue">{item.tag}</div>
-                    <div
+                    <EditableText
+                      fieldKey={`${item.key}_title`}
+                      value={item.title}
+                      onChange={(v) => setValue(`${item.key}_title`, v)}
+                      onSelect={() => setSelectedField(`${item.key}_title`)}
+                      as="div"
                       className="mt-3 font-display text-2xl font-bold text-navy-deep"
                       style={styleOf(fieldStyles, `${item.key}_title`)}
-                    >
-                      {item.title}
-                    </div>
-                    <div
+                    />
+                    <EditableText
+                      fieldKey={`${item.key}_desc`}
+                      value={item.desc}
+                      onChange={(v) => setValue(`${item.key}_desc`, v)}
+                      onSelect={() => setSelectedField(`${item.key}_desc`)}
+                      multiline
+                      as="div"
                       className="mt-4 text-sm leading-relaxed text-muted-foreground"
                       style={styleOf(fieldStyles, `${item.key}_desc`)}
-                    >
-                      {item.desc}
-                    </div>
+                    />
                   </div>
                 </div>
               ))}
