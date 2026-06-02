@@ -257,7 +257,11 @@ export function LiveEditorPanel({ token }: { token: string }) {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="space-y-4">
+      <div className="rounded-md border border-mid-blue/30 bg-mid-blue/5 px-4 py-2 text-sm font-medium text-navy-deep">
+        首页可视化编辑器已加载
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-4 rounded-md border border-border bg-silver/10 p-4">
         <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Home Preview (click a section)</div>
         {order.map((id) => sectionPreview(id))}
