@@ -92,6 +92,8 @@ const BUILTIN_FONTS: { label: string; value: string }[] = [
   { label: "无衬线 Sans", value: "sans-serif" },
   { label: "衬线 Serif", value: "Georgia, serif" },
   { label: "等宽 Mono", value: "JetBrains Mono, monospace" },
+  { label: "优设标题黑", value: '"YouSheBiaoTiHei", "PingFang SC", sans-serif' },
+  { label: "钉钉进步体", value: '"DingDingJinBuTi", "PingFang SC", sans-serif' },
 ];
 
 type FieldStyle = {
