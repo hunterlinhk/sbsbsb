@@ -180,6 +180,7 @@ export const saveHomeLiveEditor = createServerFn({ method: "POST" })
             cta: z.boolean().optional(),
           })
           .optional(),
+        field_styles: z.record(z.string(), z.any()).optional(),
       }),
     }).parse(input),
   )
