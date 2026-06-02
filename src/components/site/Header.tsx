@@ -17,11 +17,11 @@ export function Header() {
   const s = data?.item;
   const logoUrl = s?.logo_url || defaultLogo;
   const links = [
-    { to: "/", label: s?.nav_home || "Home" },
-    { to: "/products", label: s?.nav_products || "Products" },
-    { to: "/news", label: s?.nav_news || "News" },
-    { to: "/about", label: s?.nav_about || "About" },
-    { to: "/contact", label: s?.nav_contact || "Contact" },
+    { to: "/", label: s?.nav_home || "首页" },
+    { to: "/products", label: s?.nav_products || "产品" },
+    { to: "/news", label: s?.nav_news || "新闻" },
+    { to: "/about", label: s?.nav_about || "关于我们" },
+    { to: "/contact", label: s?.nav_contact || "联系我们" },
   ] as const;
 
   useEffect(() => {
