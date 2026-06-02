@@ -73,7 +73,7 @@ export function Header() {
           to="/contact"
           className="hidden rounded-sm border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white backdrop-blur transition-all hover:border-mid-blue hover:bg-mid-blue/20 lg:inline-flex"
         >
-          {s?.nav_cta || "Get Quote"} {"->"}
+          {s?.nav_cta || "获取报价"} {"->"}
         </Link>
 
         <button onClick={() => setOpen(!open)} className="text-white lg:hidden" aria-label="Toggle menu">
