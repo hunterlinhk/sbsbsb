@@ -247,7 +247,7 @@ function EditableText({
   style,
   placeholder,
 }: EditableTextProps) {
-  const Tag = as as keyof JSX.IntrinsicElements;
+  const Tag = as as React.ElementType;
   const ref = useRef<HTMLElement>(null);
 
   // Sync external value into the DOM only when the element isn't focused
