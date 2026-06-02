@@ -184,10 +184,6 @@ function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
   return Object.keys(css).length ? css : undefined;
 }
 
-function splitLines(value: unknown, fallback: string) {
-  return String(value ?? fallback).split("\n");
-}
-
 function getIcon(icon: string | undefined) {
   return ICONS[String(icon || "").toLowerCase()] || Cpu;
 }
