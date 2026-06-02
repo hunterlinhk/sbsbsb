@@ -12,6 +12,22 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
+@font-face {
+  font-family: 'YouSheBiaoTiHei';
+  src: url('/__l5e/assets-v1/e7376714-648d-4e9c-a37f-faa34e40e4b7/youshe-biaotihei.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DingDingJinBuTi';
+  src: url('/__l5e/assets-v1/445e1287-466d-40d2-9afe-2b8f52f57f95/dingding-jinbuti.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
