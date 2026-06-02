@@ -63,7 +63,7 @@ export function AdminShell({
   return (
     <div className="min-h-screen bg-silver/20">
       <header className="sticky top-0 z-30 border-b border-border bg-white">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-4">
+        <div className={`mx-auto flex ${wide ? "max-w-none" : "max-w-[1600px]"} items-center justify-between px-6 py-4`}>
           <div>
             <div className="text-[10px] font-medium uppercase tracking-[0.3em] text-mid-blue">Admin Console</div>
             <div className="font-display text-lg font-bold text-navy-deep">景鸿科技 内容管理后台</div>
@@ -77,9 +77,10 @@ export function AdminShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1600px] gap-6 px-6 py-8">
+      <div className={`mx-auto flex ${wide ? "max-w-none" : "max-w-[1600px]"} gap-6 px-6 py-8`}>
         <aside className="w-56 shrink-0">
           <nav className="sticky top-24 space-y-1">
+
             {ADMIN_TABS.map((t) => {
               const Icon = t.icon;
               const active = !liveEditorActive && !puckActive && activeTab === t.id;
