@@ -882,18 +882,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.capabilities_eyebrow ?? "核心能力")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="capabilities_title"
+              value={String(form.capabilities_title ?? "我们的能力")}
+              onChange={(v) => setValue("capabilities_title", v)}
+              onSelect={() => setSelectedField("capabilities_title")}
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
               style={styleOf(fieldStyles, "capabilities_title")}
-            >
-              {String(form.capabilities_title ?? "我们的能力")}
-            </h3>
-            <p
+            />
+            <EditableText
+              fieldKey="capabilities_desc"
+              value={String(form.capabilities_desc ?? "")}
+              onChange={(v) => setValue("capabilities_desc", v)}
+              onSelect={() => setSelectedField("capabilities_desc")}
+              multiline
+              as="p"
               className="mt-3 max-w-xl text-sm text-muted-foreground"
               style={styleOf(fieldStyles, "capabilities_desc")}
-            >
-              {String(form.capabilities_desc ?? "")}
-            </p>
+            />
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {previewCapabilities.slice(0, 4).map((item) => {
                 const Icon = getIcon(item.icon);
