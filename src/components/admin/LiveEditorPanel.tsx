@@ -204,16 +204,101 @@ function EditableBlock({
   children: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
+      role="group"
       title={title}
-      className={`block w-full text-left transition ${
-        selected ? "ring-2 ring-mid-blue ring-offset-2 ring-offset-white" : "hover:ring-1 hover:ring-mid-blue/60"
+      onClick={(e) => {
+        // Only react when the click target is not an editable text
+        const target = e.target as HTMLElement;
+        if (target.closest("[data-editable-text]")) return;
+        onSelect();
+      }}
+      className={`block w-full cursor-pointer text-left transition ${
+        selected
+          ? "ring-2 ring-mid-blue ring-offset-2 ring-offset-white"
+          : "hover:ring-1 hover:ring-mid-blue/60"
       }`}
     >
       {children}
-    </button>
+    </div>
+  );
+}
+
+type EditableTextProps = {
+  fieldKey: string;
+  value: string;
+  onChange: (next: string) => void;
+  onSelect: () => void;
+  multiline?: boolean;
+  as?: "span" | "div" | "p" | "h1" | "h2" | "h3";
+  className?: string;
+  style?: CSSProperties;
+  placeholder?: string;
+};
+
+function EditableText({
+  fieldKey,
+  value,
+  onChange,
+  onSelect,
+  multiline,
+  as = "span",
+  className,
+  style,
+  placeholder,
+}: EditableTextProps) {
+  const Tag = as as keyof JSX.IntrinsicElements;
+  const ref = useRef<HTMLElement>(null);
+
+  // Sync external value into the DOM only when the element isn't focused
+  // (so typing isn't interrupted).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (document.activeElement === el) return;
+    if (el.innerText !== value) el.innerText = value;
+  }, [value]);
+
+  const composedStyle: CSSProperties = {
+    outline: "none",
+    minWidth: "1ch",
+    minHeight: "1em",
+    whiteSpace: multiline ? "pre-wrap" : undefined,
+    ...style,
+  };
+
+  return (
+    // @ts-expect-error - dynamic intrinsic tag
+    <Tag
+      ref={ref as never}
+      data-editable-text={fieldKey}
+      data-placeholder={placeholder}
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={false}
+      onFocus={(e: React.FocusEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onInput={(e: React.FormEvent<HTMLElement>) => {
+        // Keep the parent form in sync as the user types so the right panel
+        // and rendered styles reflect changes immediately.
+        const text = (e.currentTarget as HTMLElement).innerText;
+        onChange(text);
+      }}
+      onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
+        if (!multiline && e.key === "Enter") {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).blur();
+        }
+      }}
+      className={className}
+      style={composedStyle}
+    />
   );
 }
 
