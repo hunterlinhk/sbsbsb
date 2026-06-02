@@ -1,0 +1,1 @@
+UPDATE public.home_content SET puck_data = NULL WHERE id = 1;
