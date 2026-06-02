@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Cpu, Factory, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
-import { Fragment, useMemo, useRef, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Render } from "@measured/puck";
 import { Counter } from "@/components/site/Counter";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
@@ -13,6 +14,8 @@ import qualityImg from "@/assets/quality.jpg";
 import coilImg from "@/assets/product-coil.jpg";
 import motorImg from "@/assets/product-motor.jpg";
 import { getHomeContent } from "@/lib/site.functions";
+import { puckConfig, isValidPuckData } from "@/lib/puck-config";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
