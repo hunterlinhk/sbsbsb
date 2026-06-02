@@ -147,13 +147,15 @@ function IndexPage() {
 
   void fontsReady;
 
+  const fs = ((home as Record<string, unknown> | undefined)?.field_styles ?? {}) as FieldStyles;
+
   const sections: Record<SectionId, ReactNode> = {
-    hero: <Hero h={home} />,
-    stats: <Stats h={home} />,
-    capabilities: <Capabilities h={home} capabilities={capabilities} />,
-    clients: <Clients h={home} brands={brands} />,
-    advantage: <Advantage h={home} />,
-    cta: <CTA h={home} />,
+    hero: <Hero h={home} fs={fs} />,
+    stats: <Stats h={home} fs={fs} />,
+    capabilities: <Capabilities h={home} capabilities={capabilities} fs={fs} />,
+    clients: <Clients h={home} brands={brands} fs={fs} />,
+    advantage: <Advantage h={home} fs={fs} />,
+    cta: <CTA h={home} fs={fs} />,
   };
 
   return (
