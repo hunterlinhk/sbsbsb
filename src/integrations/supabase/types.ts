@@ -190,16 +190,13 @@ export type Database = {
           advantage_title: string | null
           brands: Json | null
           btn_contact: string | null
-          btn_contact_link: string
           btn_explore: string | null
-          btn_explore_link: string
           capabilities_desc: string | null
           capabilities_eyebrow: string | null
           capabilities_title: string | null
           clients_eyebrow: string | null
           clients_title: string | null
           cta_button: string | null
-          cta_button_link: string
           cta_desc: string | null
           cta_eyebrow: string | null
           cta_title: string | null
@@ -210,8 +207,6 @@ export type Database = {
           hero_title_line1: string | null
           hero_title_line2: string | null
           id: number
-          section_order: Json | null
-          section_visibility: Json | null
           stat1_label: string | null
           stat1_suffix: string | null
           stat1_value: number | null
@@ -241,16 +236,13 @@ export type Database = {
           advantage_title?: string | null
           brands?: Json | null
           btn_contact?: string | null
-          btn_contact_link?: string
           btn_explore?: string | null
-          btn_explore_link?: string
           capabilities_desc?: string | null
           capabilities_eyebrow?: string | null
           capabilities_title?: string | null
           clients_eyebrow?: string | null
           clients_title?: string | null
           cta_button?: string | null
-          cta_button_link?: string
           cta_desc?: string | null
           cta_eyebrow?: string | null
           cta_title?: string | null
@@ -261,8 +253,6 @@ export type Database = {
           hero_title_line1?: string | null
           hero_title_line2?: string | null
           id?: number
-          section_order?: Json | null
-          section_visibility?: Json | null
           stat1_label?: string | null
           stat1_suffix?: string | null
           stat1_value?: number | null
@@ -292,16 +282,13 @@ export type Database = {
           advantage_title?: string | null
           brands?: Json | null
           btn_contact?: string | null
-          btn_contact_link?: string
           btn_explore?: string | null
-          btn_explore_link?: string
           capabilities_desc?: string | null
           capabilities_eyebrow?: string | null
           capabilities_title?: string | null
           clients_eyebrow?: string | null
           clients_title?: string | null
           cta_button?: string | null
-          cta_button_link?: string
           cta_desc?: string | null
           cta_eyebrow?: string | null
           cta_title?: string | null
@@ -312,8 +299,6 @@ export type Database = {
           hero_title_line1?: string | null
           hero_title_line2?: string | null
           id?: number
-          section_order?: Json | null
-          section_visibility?: Json | null
           stat1_label?: string | null
           stat1_suffix?: string | null
           stat1_value?: number | null
