@@ -1,13 +1,15 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
+  Bold,
   Cpu,
   Eye,
   EyeOff,
   Factory,
+  Italic,
   ShieldCheck,
   Zap,
   type LucideIcon,
@@ -46,39 +48,59 @@ const ICONS: Record<string, LucideIcon> = {
 };
 
 const SECTION_LABELS: Record<SectionId, string> = {
-  hero: "Hero",
-  stats: "Stats",
-  capabilities: "Capabilities",
-  clients: "Clients",
-  advantage: "Advantage",
-  cta: "CTA",
+  hero: "首屏 Hero",
+  stats: "数据 Stats",
+  capabilities: "能力 Capabilities",
+  clients: "客户 Clients",
+  advantage: "优势 Advantage",
+  cta: "行动召唤 CTA",
 };
 
 const EDITABLE_FIELDS: { key: string; label: string; multiline?: boolean; image?: boolean }[] = [
-  { key: "hero_eyebrow", label: "Hero Eyebrow" },
-  { key: "hero_title_line1", label: "Hero Title Line 1" },
-  { key: "hero_title_line2", label: "Hero Title Line 2" },
-  { key: "hero_intro", label: "Hero Intro", multiline: true },
-  { key: "hero_image", label: "Hero Image URL", image: true },
-  { key: "btn_explore", label: "Hero Primary Button Text" },
-  { key: "btn_explore_link", label: "Hero Primary Button Link" },
-  { key: "btn_contact", label: "Hero Secondary Button Text" },
-  { key: "btn_contact_link", label: "Hero Secondary Button Link" },
-  { key: "stats_title", label: "Stats Title", multiline: true },
-  { key: "capabilities_title", label: "Capabilities Title" },
-  { key: "clients_title", label: "Clients Title" },
-  { key: "advantage_title", label: "Advantage Title", multiline: true },
-  { key: "adv1_title", label: "Advantage Card 1 Title" },
-  { key: "adv1_desc", label: "Advantage Card 1 Description", multiline: true },
-  { key: "adv1_image", label: "Advantage Card 1 Image", image: true },
-  { key: "adv2_title", label: "Advantage Card 2 Title" },
-  { key: "adv2_desc", label: "Advantage Card 2 Description", multiline: true },
-  { key: "adv2_image", label: "Advantage Card 2 Image", image: true },
-  { key: "cta_title", label: "CTA Title", multiline: true },
-  { key: "cta_desc", label: "CTA Description", multiline: true },
-  { key: "cta_button", label: "CTA Button Text" },
-  { key: "cta_button_link", label: "CTA Button Link" },
+  { key: "hero_eyebrow", label: "首屏 - 小标签" },
+  { key: "hero_title_line1", label: "首屏 - 主标题第一行" },
+  { key: "hero_title_line2", label: "首屏 - 主标题第二行" },
+  { key: "hero_intro", label: "首屏 - 介绍文字", multiline: true },
+  { key: "hero_image", label: "首屏 - 背景图", image: true },
+  { key: "btn_explore", label: "首屏 - 主按钮文字" },
+  { key: "btn_explore_link", label: "首屏 - 主按钮链接" },
+  { key: "btn_contact", label: "首屏 - 次按钮文字" },
+  { key: "btn_contact_link", label: "首屏 - 次按钮链接" },
+  { key: "stats_title", label: "数据 - 标题（多行）", multiline: true },
+  { key: "capabilities_title", label: "能力 - 标题" },
+  { key: "capabilities_desc", label: "能力 - 描述", multiline: true },
+  { key: "clients_title", label: "客户 - 标题" },
+  { key: "advantage_title", label: "优势 - 标题", multiline: true },
+  { key: "adv1_title", label: "优势卡片 1 - 标题" },
+  { key: "adv1_desc", label: "优势卡片 1 - 描述", multiline: true },
+  { key: "adv1_image", label: "优势卡片 1 - 图片", image: true },
+  { key: "adv2_title", label: "优势卡片 2 - 标题" },
+  { key: "adv2_desc", label: "优势卡片 2 - 描述", multiline: true },
+  { key: "adv2_image", label: "优势卡片 2 - 图片", image: true },
+  { key: "cta_title", label: "CTA - 标题（多行）", multiline: true },
+  { key: "cta_desc", label: "CTA - 描述", multiline: true },
+  { key: "cta_button", label: "CTA - 按钮文字" },
+  { key: "cta_button_link", label: "CTA - 按钮链接" },
 ];
+
+const BUILTIN_FONTS: { label: string; value: string }[] = [
+  { label: "默认（继承）", value: "" },
+  { label: "Inter", value: "Inter, system-ui, sans-serif" },
+  { label: "系统字体", value: "system-ui, -apple-system, sans-serif" },
+  { label: "苹方 / PingFang", value: "PingFang SC, -apple-system, sans-serif" },
+  { label: "思源黑体 / Noto Sans", value: "Noto Sans SC, sans-serif" },
+  { label: "无衬线 Sans", value: "sans-serif" },
+  { label: "衬线 Serif", value: "Georgia, serif" },
+  { label: "等宽 Mono", value: "JetBrains Mono, monospace" },
+];
+
+type FieldStyle = {
+  fontFamily?: string;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+};
+type FieldStyles = Record<string, FieldStyle>;
 
 const checkerboardStyle = {
   backgroundColor: "#0f172a",
@@ -111,6 +133,22 @@ function parseSectionVisibility(value: unknown): Record<SectionId, boolean> {
     }
   }
   return visibility;
+}
+
+function parseFieldStyles(value: unknown): FieldStyles {
+  if (!value || typeof value !== "object") return {};
+  return value as FieldStyles;
+}
+
+function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
+  const s = styles[key];
+  if (!s) return undefined;
+  const css: CSSProperties = {};
+  if (s.fontFamily) css.fontFamily = s.fontFamily;
+  if (s.fontSize) css.fontSize = `${s.fontSize}px`;
+  if (s.bold) css.fontWeight = 700;
+  if (s.italic) css.fontStyle = "italic";
+  return Object.keys(css).length ? css : undefined;
 }
 
 function splitLines(value: unknown, fallback: string) {
@@ -157,6 +195,107 @@ function LogoPlate({ logoUrl, alt }: { logoUrl: string; alt: string }) {
   );
 }
 
+function FontControls({
+  value,
+  onChange,
+  customFonts,
+}: {
+  value: FieldStyle;
+  onChange: (next: FieldStyle) => void;
+  customFonts: { name: string; url: string }[];
+}) {
+  const update = (patch: Partial<FieldStyle>) => onChange({ ...value, ...patch });
+  return (
+    <div className="mt-4 space-y-3 rounded border border-border bg-silver/10 p-3">
+      <div className="text-xs font-semibold text-navy-deep">文字样式</div>
+
+      <div>
+        <div className="mb-1 text-xs text-muted-foreground">字体</div>
+        <select
+          className="w-full border border-border bg-white px-2 py-1.5 text-sm"
+          value={value.fontFamily ?? ""}
+          onChange={(e) => update({ fontFamily: e.target.value || undefined })}
+        >
+          {BUILTIN_FONTS.map((f) => (
+            <option key={f.label} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+          {customFonts.map((f) => (
+            <option key={`custom-${f.name}`} value={`"${f.name}"`}>
+              {f.name}（自定义）
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+          <span>字号</span>
+          <span>{value.fontSize ? `${value.fontSize}px` : "默认"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min={10}
+            max={120}
+            step={1}
+            value={value.fontSize ?? 16}
+            onChange={(e) => update({ fontSize: Number(e.target.value) })}
+            className="flex-1"
+          />
+          <input
+            type="number"
+            min={8}
+            max={200}
+            value={value.fontSize ?? ""}
+            placeholder="px"
+            onChange={(e) =>
+              update({ fontSize: e.target.value ? Number(e.target.value) : undefined })
+            }
+            className="w-16 border border-border bg-white px-2 py-1 text-xs"
+          />
+          <button
+            type="button"
+            onClick={() => update({ fontSize: undefined })}
+            className="border border-border bg-white px-2 py-1 text-xs text-muted-foreground"
+          >
+            重置
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => update({ bold: !value.bold })}
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.bold ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
+          }`}
+        >
+          <Bold size={12} /> 加粗
+        </button>
+        <button
+          type="button"
+          onClick={() => update({ italic: !value.italic })}
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.italic ? "border-mid-blue bg-mid-blue text-white" : "border-border bg-white text-navy-deep"
+          }`}
+        >
+          <Italic size={12} /> 斜体
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange({})}
+          className="ml-auto border border-border bg-white px-2 py-1.5 text-xs text-muted-foreground"
+        >
+          清空样式
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function LiveEditorPanel({ token }: { token: string }) {
   const qc = useQueryClient();
   const { data, isLoading, isError, error } = useQuery({
@@ -172,31 +311,75 @@ export function LiveEditorPanel({ token }: { token: string }) {
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [selectedField, setSelectedField] = useState("hero_title_line1");
+  const [customFonts, setCustomFonts] = useState<{ name: string; url: string }[]>([]);
 
   useEffect(() => {
     if (data?.home) setForm(data.home as Record<string, unknown>);
   }, [data]);
+
+  // Read custom fonts uploaded via the Puck editor (localStorage).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("custom-fonts");
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          const fonts = arr.filter(
+            (f) => f && typeof f.name === "string" && typeof f.url === "string",
+          );
+          setCustomFonts(fonts);
+          // inject @font-face for preview
+          const styleId = "live-editor-custom-fonts";
+          let el = document.getElementById(styleId) as HTMLStyleElement | null;
+          if (!el) {
+            el = document.createElement("style");
+            el.id = styleId;
+            document.head.appendChild(el);
+          }
+          el.textContent = fonts
+            .map(
+              (f) =>
+                `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
+            )
+            .join("\n");
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const order = useMemo(() => parseSectionOrder(form.section_order), [form.section_order]);
   const visibility = useMemo(
     () => parseSectionVisibility(form.section_visibility),
     [form.section_visibility],
   );
+  const fieldStyles = useMemo(() => parseFieldStyles(form.field_styles), [form.field_styles]);
   const brands = ((form.brands as string[] | undefined) ?? DEFAULT_BRANDS).slice(0, 6);
   const capabilities = data?.capabilities ?? [];
   const site = siteSettingsData?.item as Record<string, unknown> | undefined;
   const logoUrl = String(site?.logo_url ?? defaultLogo);
   const companyName = String(site?.company_name ?? "Logo");
   const navLinks = [
-    String(site?.nav_home ?? "Home"),
-    String(site?.nav_products ?? "Products"),
-    String(site?.nav_news ?? "News"),
-    String(site?.nav_about ?? "About"),
-    String(site?.nav_contact ?? "Contact"),
+    String(site?.nav_home ?? "首页"),
+    String(site?.nav_products ?? "产品"),
+    String(site?.nav_news ?? "新闻"),
+    String(site?.nav_about ?? "关于我们"),
+    String(site?.nav_contact ?? "联系我们"),
   ];
 
   const setValue = (key: string, value: unknown) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const setFieldStyle = (key: string, style: FieldStyle) => {
+    const next: FieldStyles = { ...fieldStyles };
+    if (!style || Object.keys(style).length === 0) {
+      delete next[key];
+    } else {
+      next[key] = style;
+    }
+    setValue("field_styles", next);
   };
 
   const toggleSection = (id: SectionId) => {
@@ -221,15 +404,16 @@ export function LiveEditorPanel({ token }: { token: string }) {
             ...form,
             section_order: order,
             section_visibility: visibility,
+            field_styles: fieldStyles,
           },
         },
       });
-      toast.success("Saved");
+      toast.success("已保存");
       qc.invalidateQueries({ queryKey: ["home-content"] });
       qc.invalidateQueries({ queryKey: ["admin-home"] });
       qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : "Save failed");
+      toast.error(saveError instanceof Error ? saveError.message : "保存失败");
     } finally {
       setSaving(false);
     }
@@ -239,9 +423,9 @@ export function LiveEditorPanel({ token }: { token: string }) {
     return (
       <div className="space-y-4">
         <div className="border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
-          Live Editor loaded
+          可视化编辑器已加载
         </div>
-        <div className="py-6 text-muted-foreground">Loading home page data</div>
+        <div className="py-6 text-muted-foreground">正在加载首页数据…</div>
       </div>
     );
   }
@@ -250,10 +434,10 @@ export function LiveEditorPanel({ token }: { token: string }) {
     return (
       <div className="space-y-4">
         <div className="border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
-          Live Editor loaded
+          可视化编辑器已加载
         </div>
         <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Failed to load data: {error instanceof Error ? error.message : "Unknown error"}
+          数据加载失败：{error instanceof Error ? error.message : "未知错误"}
         </div>
       </div>
     );
@@ -264,32 +448,32 @@ export function LiveEditorPanel({ token }: { token: string }) {
   const previewCapabilities = capabilities.length
     ? capabilities
     : [
-        { id: "cap-1", title: "Precision Coil", description: "Fine-tuned winding for mobile modules.", icon: "cpu" },
-        { id: "cap-2", title: "Rapid Tooling", description: "Flexible setup for sampling and production.", icon: "zap" },
-        { id: "cap-3", title: "Smart Workshop", description: "Stable output through automated line control.", icon: "factory" },
-        { id: "cap-4", title: "Quality Assurance", description: "Inspection checkpoints from start to shipment.", icon: "shield-check" },
+        { id: "cap-1", title: "精密线圈", description: "为移动模组提供精细绕线工艺。", icon: "cpu" },
+        { id: "cap-2", title: "快速打样", description: "灵活的打样与量产切换能力。", icon: "zap" },
+        { id: "cap-3", title: "智能车间", description: "通过自动化产线保持稳定产出。", icon: "factory" },
+        { id: "cap-4", title: "品质保证", description: "从首件到出货的全流程检验。", icon: "shield-check" },
       ];
 
   const stats = [
     {
       value: String(form.stat1_value ?? 1800),
-      suffix: String(form.stat1_suffix ?? "sqm"),
-      label: String(form.stat1_label ?? "Workshop"),
+      suffix: String(form.stat1_suffix ?? "㎡"),
+      label: String(form.stat1_label ?? "厂房面积"),
     },
     {
       value: String(form.stat2_value ?? 90),
       suffix: String(form.stat2_suffix ?? "+"),
-      label: String(form.stat2_label ?? "Team"),
+      label: String(form.stat2_label ?? "团队规模"),
     },
     {
       value: String(form.stat3_value ?? 80),
       suffix: String(form.stat3_suffix ?? "+"),
-      label: String(form.stat3_label ?? "Machines"),
+      label: String(form.stat3_label ?? "设备数量"),
     },
     {
       value: String(form.stat4_value ?? 2000),
-      suffix: String(form.stat4_suffix ?? " / month"),
-      label: String(form.stat4_label ?? "Capacity"),
+      suffix: String(form.stat4_suffix ?? "万/月"),
+      label: String(form.stat4_label ?? "月产能"),
     },
   ];
 
@@ -300,7 +484,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
       return (
         <EditableBlock
           key={id}
-          title="hero"
+          title="首屏 Hero"
           selected={selectedField.startsWith("hero_") || selectedField.startsWith("btn_")}
           onSelect={() => setSelectedField("hero_title_line1")}
         >
@@ -312,25 +496,41 @@ export function LiveEditorPanel({ token }: { token: string }) {
             />
             <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(9,20,43,0.88),rgba(9,20,43,0.58),rgba(12,74,110,0.42))]" />
             <div className="relative z-10 px-6 py-14 text-white md:px-8 md:py-20">
-              <div className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-silver/90">
+              <div
+                className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-silver/90"
+                style={styleOf(fieldStyles, "hero_eyebrow")}
+              >
                 <span className="h-1.5 w-1.5 rounded-full bg-mid-blue" />
-                {String(form.hero_eyebrow ?? "Precision Coil Manufacturing")}
+                {String(form.hero_eyebrow ?? "精密线圈制造")}
               </div>
               <h3 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[1.02] md:text-5xl">
-                {String(form.hero_title_line1 ?? "Precision Manufacturing")}
+                <span style={styleOf(fieldStyles, "hero_title_line1")}>
+                  {String(form.hero_title_line1 ?? "精密制造")}
+                </span>
                 <br />
-                <span className="text-silver">{String(form.hero_title_line2 ?? "Built for Scale")}</span>
+                <span className="text-silver" style={styleOf(fieldStyles, "hero_title_line2")}>
+                  {String(form.hero_title_line2 ?? "为规模而生")}
+                </span>
               </h3>
-              <p className="mt-5 max-w-2xl text-sm leading-relaxed text-silver/80 md:text-base">
+              <p
+                className="mt-5 max-w-2xl text-sm leading-relaxed text-silver/80 md:text-base"
+                style={styleOf(fieldStyles, "hero_intro")}
+              >
                 {String(form.hero_intro ?? "")}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-2 bg-mid-blue px-5 py-3 text-xs font-medium text-white">
-                  {String(form.btn_explore ?? "Explore")}
+                <span
+                  className="inline-flex items-center gap-2 bg-mid-blue px-5 py-3 text-xs font-medium text-white"
+                  style={styleOf(fieldStyles, "btn_explore")}
+                >
+                  {String(form.btn_explore ?? "了解产品")}
                   <ArrowRight size={14} />
                 </span>
-                <span className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-5 py-3 text-xs font-medium text-white">
-                  {String(form.btn_contact ?? "Contact")}
+                <span
+                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-5 py-3 text-xs font-medium text-white"
+                  style={styleOf(fieldStyles, "btn_contact")}
+                >
+                  {String(form.btn_contact ?? "联系我们")}
                 </span>
               </div>
             </div>
@@ -343,16 +543,19 @@ export function LiveEditorPanel({ token }: { token: string }) {
       return (
         <EditableBlock
           key={id}
-          title="stats"
+          title="数据 Stats"
           selected={selectedField.startsWith("stats_") || selectedField.startsWith("stat")}
           onSelect={() => setSelectedField("stats_title")}
         >
           <section className="bg-navy-deep px-6 py-10 text-white md:px-8 md:py-14">
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
-              {String(form.stats_eyebrow ?? "By the numbers")}
+              {String(form.stats_eyebrow ?? "数据见证")}
             </div>
-            <h3 className="mt-4 font-display text-3xl font-bold leading-tight md:text-4xl">
-              {splitLines(form.stats_title, "Manufacturing strength\nat scale").map((line, index, lines) => (
+            <h3
+              className="mt-4 font-display text-3xl font-bold leading-tight md:text-4xl"
+              style={styleOf(fieldStyles, "stats_title")}
+            >
+              {splitLines(form.stats_title, "规模化的\n制造实力").map((line, index, lines) => (
                 <span key={`${line}-${index}`}>
                   {line}
                   {index < lines.length - 1 && <br />}
@@ -380,18 +583,24 @@ export function LiveEditorPanel({ token }: { token: string }) {
       return (
         <EditableBlock
           key={id}
-          title="capabilities"
+          title="能力 Capabilities"
           selected={selectedField.startsWith("capabilities_")}
           onSelect={() => setSelectedField("capabilities_title")}
         >
           <section className="bg-background px-6 py-10 md:px-8 md:py-14">
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
-              {String(form.capabilities_eyebrow ?? "Core Capabilities")}
+              {String(form.capabilities_eyebrow ?? "核心能力")}
             </div>
-            <h3 className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
-              {String(form.capabilities_title ?? "Capabilities")}
+            <h3
+              className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
+              style={styleOf(fieldStyles, "capabilities_title")}
+            >
+              {String(form.capabilities_title ?? "我们的能力")}
             </h3>
-            <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+            <p
+              className="mt-3 max-w-xl text-sm text-muted-foreground"
+              style={styleOf(fieldStyles, "capabilities_desc")}
+            >
               {String(form.capabilities_desc ?? "")}
             </p>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -415,17 +624,20 @@ export function LiveEditorPanel({ token }: { token: string }) {
       return (
         <EditableBlock
           key={id}
-          title="clients"
+          title="客户 Clients"
           selected={selectedField.startsWith("clients_")}
           onSelect={() => setSelectedField("clients_title")}
         >
           <section className="bg-silver/40 px-6 py-10 md:px-8 md:py-14">
             <div className="text-center">
               <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
-                {String(form.clients_eyebrow ?? "Trusted Partners")}
+                {String(form.clients_eyebrow ?? "合作伙伴")}
               </div>
-              <h3 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl">
-                {String(form.clients_title ?? "Clients")}
+              <h3
+                className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl"
+                style={styleOf(fieldStyles, "clients_title")}
+              >
+                {String(form.clients_title ?? "服务客户")}
               </h3>
             </div>
             <div className="mt-8 grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-6">
@@ -446,15 +658,17 @@ export function LiveEditorPanel({ token }: { token: string }) {
     if (id === "advantage") {
       const items = [
         {
+          key: "adv1",
           img: String(form.adv1_image ?? workshopImg),
-          tag: String(form.adv1_tag ?? "Line"),
-          title: String(form.adv1_title ?? "Automated line"),
+          tag: String(form.adv1_tag ?? "产线"),
+          title: String(form.adv1_title ?? "自动化产线"),
           desc: String(form.adv1_desc ?? ""),
         },
         {
+          key: "adv2",
           img: String(form.adv2_image ?? qualityImg),
-          tag: String(form.adv2_tag ?? "Quality"),
-          title: String(form.adv2_title ?? "Quality control"),
+          tag: String(form.adv2_tag ?? "品质"),
+          title: String(form.adv2_title ?? "品质管控"),
           desc: String(form.adv2_desc ?? ""),
         },
       ];
@@ -462,47 +676,60 @@ export function LiveEditorPanel({ token }: { token: string }) {
       return (
         <EditableBlock
           key={id}
-          title="advantage"
+          title="优势 Advantage"
           selected={selectedField.startsWith("adv") || selectedField.startsWith("advantage_")}
           onSelect={() => setSelectedField("advantage_title")}
         >
           <section className="bg-background px-6 py-10 md:px-8 md:py-14">
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
-              {String(form.advantage_eyebrow ?? "Our Advantage")}
+              {String(form.advantage_eyebrow ?? "我们的优势")}
             </div>
-            <h3 className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
-              {String(form.advantage_title ?? "Advantage")}
+            <h3
+              className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
+              style={styleOf(fieldStyles, "advantage_title")}
+            >
+              {String(form.advantage_title ?? "核心优势")}
             </h3>
             <div className="mt-8 space-y-10">
               {items.map((item, index) => (
-                <div key={item.title} className="grid gap-6 lg:grid-cols-2 lg:items-center">
+                <div key={item.key} className="grid gap-6 lg:grid-cols-2 lg:items-center">
                   <div className={index % 2 === 1 ? "lg:order-2" : ""}>
                     <img src={item.img} alt={item.title} className="aspect-[4/3] w-full object-cover" />
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.25em] text-mid-blue">{item.tag}</div>
-                    <div className="mt-3 font-display text-2xl font-bold text-navy-deep">{item.title}</div>
-                    <div className="mt-4 text-sm leading-relaxed text-muted-foreground">{item.desc}</div>
+                    <div
+                      className="mt-3 font-display text-2xl font-bold text-navy-deep"
+                      style={styleOf(fieldStyles, `${item.key}_title`)}
+                    >
+                      {item.title}
+                    </div>
+                    <div
+                      className="mt-4 text-sm leading-relaxed text-muted-foreground"
+                      style={styleOf(fieldStyles, `${item.key}_desc`)}
+                    >
+                      {item.desc}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-10 grid gap-4 md:grid-cols-3">
               <div className="relative overflow-hidden">
-                <img src={coilImg} alt="Precision Coil" className="aspect-square w-full object-cover" />
+                <img src={coilImg} alt="精密线圈" className="aspect-square w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/15 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4 font-display text-lg font-bold text-white">Precision Coil</div>
+                <div className="absolute inset-x-0 bottom-0 p-4 font-display text-lg font-bold text-white">精密线圈</div>
               </div>
               <div className="relative overflow-hidden">
-                <img src={motorImg} alt="Linear Motor" className="aspect-square w-full object-cover" />
+                <img src={motorImg} alt="直线电机" className="aspect-square w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/15 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4 font-display text-lg font-bold text-white">Linear Motor</div>
+                <div className="absolute inset-x-0 bottom-0 p-4 font-display text-lg font-bold text-white">直线电机</div>
               </div>
               <div className="flex flex-col items-start justify-end bg-navy-deep p-5 text-white">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">Products</div>
-                <div className="mt-2 font-display text-2xl font-bold">View all products</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">产品</div>
+                <div className="mt-2 font-display text-2xl font-bold">查看全部产品</div>
                 <div className="mt-5 inline-flex items-center gap-2 text-sm text-silver">
-                  Go to products <ArrowRight size={14} />
+                  前往产品页 <ArrowRight size={14} />
                 </div>
               </div>
             </div>
@@ -514,28 +741,37 @@ export function LiveEditorPanel({ token }: { token: string }) {
     return (
       <EditableBlock
         key={id}
-        title="cta"
+        title="CTA"
         selected={selectedField.startsWith("cta_")}
         onSelect={() => setSelectedField("cta_title")}
       >
         <section className="bg-[linear-gradient(135deg,#0f172a,#12325c,#1d4f91)] px-6 py-12 text-white md:px-8 md:py-16">
           <div className="mx-auto max-w-3xl text-center">
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
-              {String(form.cta_eyebrow ?? "Let's Build Together")}
+              {String(form.cta_eyebrow ?? "携手共建")}
             </div>
-            <h3 className="mt-5 font-display text-3xl font-bold leading-tight md:text-4xl">
-              {splitLines(form.cta_title, "Let us support your next project").map((line, index, lines) => (
+            <h3
+              className="mt-5 font-display text-3xl font-bold leading-tight md:text-4xl"
+              style={styleOf(fieldStyles, "cta_title")}
+            >
+              {splitLines(form.cta_title, "让我们助力您的下一个项目").map((line, index, lines) => (
                 <span key={`${line}-${index}`}>
                   {line}
                   {index < lines.length - 1 && <br />}
                 </span>
               ))}
             </h3>
-            <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-silver/80">
+            <p
+              className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-silver/80"
+              style={styleOf(fieldStyles, "cta_desc")}
+            >
               {String(form.cta_desc ?? "")}
             </p>
-            <span className="mt-7 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-medium text-navy-deep">
-              {String(form.cta_button ?? "Contact us")}
+            <span
+              className="mt-7 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-medium text-navy-deep"
+              style={styleOf(fieldStyles, "cta_button")}
+            >
+              {String(form.cta_button ?? "联系我们")}
               <ArrowRight size={14} />
             </span>
           </div>
@@ -544,19 +780,22 @@ export function LiveEditorPanel({ token }: { token: string }) {
     );
   };
 
+  const showFontControls = !selected.image && !selected.key.endsWith("_link");
+  const currentStyle = fieldStyles[selected.key] ?? {};
+
   return (
     <div className="space-y-6">
       <div className="border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
-        Live Editor loaded
+        可视化编辑器已加载
       </div>
       {!data?.home && (
         <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Home content was not returned. The preview is showing fallback content.
+          未能获取首页内容，预览正在使用默认占位内容。
         </div>
       )}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4 rounded-md border border-border bg-silver/10 p-4">
-          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Home Preview</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">首页预览</div>
           <div className="overflow-hidden rounded-[28px] border border-border bg-white shadow-[0_20px_70px_rgba(15,23,42,0.14)]">
             <div className="border-b border-white/10 bg-navy-deep/95 px-6 py-4 text-white">
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -569,7 +808,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
                   </div>
                 </div>
                 <span className="hidden border border-white/15 px-4 py-2 text-xs text-white/90 md:inline-flex">
-                  {String(site?.nav_cta ?? "Get Quote")}
+                  {String(site?.nav_cta ?? "获取报价")}
                 </span>
               </div>
             </div>
@@ -583,13 +822,13 @@ export function LiveEditorPanel({ token }: { token: string }) {
                 <div>
                   <LogoPlate logoUrl={logoUrl} alt={companyName} />
                   <div className="mt-4 max-w-md text-sm leading-relaxed text-silver/70">
-                    {String(site?.footer_intro ?? "Focused on precision manufacturing and dependable delivery for scale production.")}
+                    {String(site?.footer_intro ?? "专注于精密制造与稳定交付，服务规模化生产。")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">Contact</div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">联系方式</div>
                   <div className="mt-3 space-y-2 text-sm">
-                    <div>{String(site?.address ?? "Dongguan, Guangdong")}</div>
+                    <div>{String(site?.address ?? "广东省东莞市")}</div>
                     <div>{String(site?.phone ?? "+86 xxx xxxx xxxx")}</div>
                     <div>{String(site?.email ?? "info@example.com")}</div>
                   </div>
@@ -601,11 +840,11 @@ export function LiveEditorPanel({ token }: { token: string }) {
 
         <div className="space-y-4">
           <div className="border border-border bg-white p-4">
-            <div className="text-sm font-semibold text-navy-deep">Section visibility & order</div>
+            <div className="text-sm font-semibold text-navy-deep">板块显示与排序</div>
             <div className="mt-3 space-y-2">
               {order.map((id, idx) => (
                 <div key={id} className="flex items-center gap-2 border border-border px-2 py-2 text-sm">
-                  <button type="button" onClick={() => toggleSection(id)} className="text-navy-deep">
+                  <button type="button" onClick={() => toggleSection(id)} className="text-navy-deep" title="显示/隐藏">
                     {visibility[id] ? <Eye size={14} /> : <EyeOff size={14} />}
                   </button>
                   <span className="min-w-0 flex-1">{SECTION_LABELS[id]}</span>
@@ -614,6 +853,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
                     onClick={() => moveSection(idx, -1)}
                     className="text-navy-deep disabled:opacity-30"
                     disabled={idx === 0}
+                    title="上移"
                   >
                     <ArrowUp size={14} />
                   </button>
@@ -622,6 +862,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
                     onClick={() => moveSection(idx, 1)}
                     className="text-navy-deep disabled:opacity-30"
                     disabled={idx === order.length - 1}
+                    title="下移"
                   >
                     <ArrowDown size={14} />
                   </button>
@@ -631,7 +872,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
           </div>
 
           <div className="border border-border bg-white p-4">
-            <div className="text-sm font-semibold text-navy-deep">Field editor</div>
+            <div className="text-sm font-semibold text-navy-deep">字段编辑</div>
             <select
               className="mt-3 w-full border border-border bg-white px-3 py-2 text-sm"
               value={selected.key}
@@ -657,11 +898,19 @@ export function LiveEditorPanel({ token }: { token: string }) {
                 </Field>
               )}
             </div>
+
+            {showFontControls && (
+              <FontControls
+                value={currentStyle}
+                onChange={(next) => setFieldStyle(selected.key, next)}
+                customFonts={customFonts}
+              />
+            )}
           </div>
         </div>
 
         <div className="xl:col-span-2">
-          <SaveBar saving={saving} onSave={save} label="Save Live Editor Changes" />
+          <SaveBar saving={saving} onSave={save} label="保存可视化编辑器修改" />
         </div>
       </div>
     </div>
