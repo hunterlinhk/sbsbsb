@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type ElementType, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -101,10 +101,26 @@ type FieldStyle = {
   fontSize?: number;
   weight?: "normal" | "bold" | "black";
   italic?: "normal" | "italic";
+  color?: string;
   // legacy field, still honored for previously-saved data
   bold?: boolean;
 };
 type FieldStyles = Record<string, FieldStyle>;
+
+const COLOR_SWATCHES: { label: string; value: string }[] = [
+  { label: "深海军蓝", value: "#0f1b3d" },
+  { label: "靛蓝", value: "#1e3a5f" },
+  { label: "中蓝", value: "#3b6fa0" },
+  { label: "银", value: "#e8edf3" },
+  { label: "白", value: "#ffffff" },
+  { label: "黑", value: "#000000" },
+  { label: "灰", value: "#6b7280" },
+  { label: "红", value: "#ef4444" },
+  { label: "橙", value: "#f59e0b" },
+  { label: "绿", value: "#22c55e" },
+  { label: "青", value: "#06b6d4" },
+  { label: "紫", value: "#8b5cf6" },
+];
 
 const PREV_SNAPSHOT_KEY = "home-content-prev-snapshot";
 
@@ -164,11 +180,8 @@ function styleOf(styles: FieldStyles, key: string): CSSProperties | undefined {
   else if (s.bold) css.fontWeight = 700;
   if (s.italic === "italic") css.fontStyle = "italic";
   else if (s.italic === "normal") css.fontStyle = "normal";
+  if (s.color) css.color = s.color;
   return Object.keys(css).length ? css : undefined;
-}
-
-function splitLines(value: unknown, fallback: string) {
-  return String(value ?? fallback).split("\n");
 }
 
 function getIcon(icon: string | undefined) {
@@ -187,16 +200,101 @@ function EditableBlock({
   children: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
+      role="group"
       title={title}
-      className={`block w-full text-left transition ${
-        selected ? "ring-2 ring-mid-blue ring-offset-2 ring-offset-white" : "hover:ring-1 hover:ring-mid-blue/60"
+      onClick={(e) => {
+        // Only react when the click target is not an editable text
+        const target = e.target as HTMLElement;
+        if (target.closest("[data-editable-text]")) return;
+        onSelect();
+      }}
+      className={`block w-full cursor-pointer text-left transition ${
+        selected
+          ? "ring-2 ring-mid-blue ring-offset-2 ring-offset-white"
+          : "hover:ring-1 hover:ring-mid-blue/60"
       }`}
     >
       {children}
-    </button>
+    </div>
+  );
+}
+
+type EditableTextProps = {
+  fieldKey: string;
+  value: string;
+  onChange: (next: string) => void;
+  onSelect: () => void;
+  multiline?: boolean;
+  as?: "span" | "div" | "p" | "h1" | "h2" | "h3";
+  className?: string;
+  style?: CSSProperties;
+  placeholder?: string;
+};
+
+function EditableText({
+  fieldKey,
+  value,
+  onChange,
+  onSelect,
+  multiline,
+  as = "span",
+  className,
+  style,
+  placeholder,
+}: EditableTextProps) {
+  const Tag = as as ElementType;
+  const ref = useRef<HTMLElement>(null);
+
+  // Sync external value into the DOM only when the element isn't focused
+  // (so typing isn't interrupted).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (document.activeElement === el) return;
+    if (el.innerText !== value) el.innerText = value;
+  }, [value]);
+
+  const composedStyle: CSSProperties = {
+    outline: "none",
+    minWidth: "1ch",
+    minHeight: "1em",
+    whiteSpace: multiline ? "pre-wrap" : undefined,
+    ...style,
+  };
+
+  return (
+    
+    <Tag
+      ref={ref as never}
+      data-editable-text={fieldKey}
+      data-placeholder={placeholder}
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={false}
+      onFocus={(e: React.FocusEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onInput={(e: React.FormEvent<HTMLElement>) => {
+        // Keep the parent form in sync as the user types so the right panel
+        // and rendered styles reflect changes immediately.
+        const text = (e.currentTarget as HTMLElement).innerText;
+        onChange(text);
+      }}
+      onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
+        if (!multiline && e.key === "Enter") {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).blur();
+        }
+      }}
+      className={className}
+      style={composedStyle}
+    />
   );
 }
 
@@ -319,8 +417,37 @@ function FontControls({
       </div>
 
       <div className="flex items-center gap-2">
-        <Bold size={12} className="text-muted-foreground" />
-        <Italic size={12} className="text-muted-foreground" />
+        <button
+          type="button"
+          onClick={() =>
+            update({
+              weight: (value.weight === "bold" || value.bold) ? "normal" : "bold",
+              bold: undefined,
+            })
+          }
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.weight === "bold" || value.bold
+              ? "border-mid-blue bg-mid-blue text-white"
+              : "border-border bg-white text-navy-deep"
+          }`}
+          title="快捷加粗（再次点击切回常规）"
+        >
+          <Bold size={12} /> 加粗
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            update({ italic: value.italic === "italic" ? "normal" : "italic" })
+          }
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.italic === "italic"
+              ? "border-mid-blue bg-mid-blue text-white"
+              : "border-border bg-white text-navy-deep"
+          }`}
+          title="快捷斜体（再次点击切回正常）"
+        >
+          <Italic size={12} /> 斜体
+        </button>
         <button
           type="button"
           onClick={() => onChange({})}
@@ -328,6 +455,56 @@ function FontControls({
         >
           清空样式
         </button>
+      </div>
+
+      <div>
+        <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+          <span>文字颜色</span>
+          <span>{value.color ?? "默认（继承）"}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="color"
+            value={value.color ?? "#0f1b3d"}
+            onChange={(e) => update({ color: e.target.value })}
+            className="h-8 w-10 cursor-pointer border border-border bg-white p-0"
+            title="自定义颜色"
+          />
+          <input
+            type="text"
+            value={value.color ?? ""}
+            placeholder="#hex"
+            onChange={(e) => {
+              const v = e.target.value.trim();
+              update({ color: v || undefined });
+            }}
+            className="w-24 border border-border bg-white px-2 py-1 font-mono text-xs"
+          />
+          <button
+            type="button"
+            onClick={() => update({ color: undefined })}
+            className="border border-border bg-white px-2 py-1 text-xs text-muted-foreground"
+          >
+            清除
+          </button>
+        </div>
+        <div className="mt-2 grid grid-cols-6 gap-1.5">
+          {COLOR_SWATCHES.map((c) => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => update({ color: c.value })}
+              title={`${c.label} ${c.value}`}
+              aria-label={c.label}
+              className={`h-7 w-full border ${
+                value.color?.toLowerCase() === c.value.toLowerCase()
+                  ? "border-mid-blue ring-2 ring-mid-blue/40"
+                  : "border-border"
+              }`}
+              style={{ backgroundColor: c.value }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -579,40 +756,70 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="relative z-10 px-6 py-14 text-white md:px-8 md:py-20">
               <div
                 className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-silver/90"
-                style={styleOf(fieldStyles, "hero_eyebrow")}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-mid-blue" />
-                {String(form.hero_eyebrow ?? "精密线圈制造")}
+                <EditableText
+                  fieldKey="hero_eyebrow"
+                  value={String(form.hero_eyebrow ?? "精密线圈制造")}
+                  onChange={(v) => setValue("hero_eyebrow", v)}
+                  onSelect={() => setSelectedField("hero_eyebrow")}
+                  as="span"
+                  style={styleOf(fieldStyles, "hero_eyebrow")}
+                />
               </div>
               <h3 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[1.02] md:text-5xl">
-                <span style={styleOf(fieldStyles, "hero_title_line1")}>
-                  {String(form.hero_title_line1 ?? "精密制造")}
-                </span>
+                <EditableText
+                  fieldKey="hero_title_line1"
+                  value={String(form.hero_title_line1 ?? "精密制造")}
+                  onChange={(v) => setValue("hero_title_line1", v)}
+                  onSelect={() => setSelectedField("hero_title_line1")}
+                  as="span"
+                  style={styleOf(fieldStyles, "hero_title_line1")}
+                />
                 <br />
-                <span className="text-silver" style={styleOf(fieldStyles, "hero_title_line2")}>
-                  {String(form.hero_title_line2 ?? "为规模而生")}
-                </span>
+                <EditableText
+                  fieldKey="hero_title_line2"
+                  value={String(form.hero_title_line2 ?? "为规模而生")}
+                  onChange={(v) => setValue("hero_title_line2", v)}
+                  onSelect={() => setSelectedField("hero_title_line2")}
+                  as="span"
+                  className="text-silver"
+                  style={styleOf(fieldStyles, "hero_title_line2")}
+                />
               </h3>
-              <p
+              <EditableText
+                fieldKey="hero_intro"
+                value={String(form.hero_intro ?? "")}
+                onChange={(v) => setValue("hero_intro", v)}
+                onSelect={() => setSelectedField("hero_intro")}
+                multiline
+                as="p"
                 className="mt-5 max-w-2xl text-sm leading-relaxed text-silver/80 md:text-base"
                 style={styleOf(fieldStyles, "hero_intro")}
-              >
-                {String(form.hero_intro ?? "")}
-              </p>
+              />
               <div className="mt-7 flex flex-wrap gap-3">
                 <span
                   className="inline-flex items-center gap-2 bg-mid-blue px-5 py-3 text-xs font-medium text-white"
-                  style={styleOf(fieldStyles, "btn_explore")}
                 >
-                  {String(form.btn_explore ?? "了解产品")}
+                  <EditableText
+                    fieldKey="btn_explore"
+                    value={String(form.btn_explore ?? "了解产品")}
+                    onChange={(v) => setValue("btn_explore", v)}
+                    onSelect={() => setSelectedField("btn_explore")}
+                    as="span"
+                    style={styleOf(fieldStyles, "btn_explore")}
+                  />
                   <ArrowRight size={14} />
                 </span>
-                <span
+                <EditableText
+                  fieldKey="btn_contact"
+                  value={String(form.btn_contact ?? "联系我们")}
+                  onChange={(v) => setValue("btn_contact", v)}
+                  onSelect={() => setSelectedField("btn_contact")}
+                  as="span"
                   className="inline-flex items-center gap-2 border border-white/20 bg-white/5 px-5 py-3 text-xs font-medium text-white"
                   style={styleOf(fieldStyles, "btn_contact")}
-                >
-                  {String(form.btn_contact ?? "联系我们")}
-                </span>
+                />
               </div>
             </div>
           </section>
@@ -632,17 +839,16 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.stats_eyebrow ?? "数据见证")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="stats_title"
+              value={String(form.stats_title ?? "规模化的\n制造实力")}
+              onChange={(v) => setValue("stats_title", v)}
+              onSelect={() => setSelectedField("stats_title")}
+              multiline
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight md:text-4xl"
               style={styleOf(fieldStyles, "stats_title")}
-            >
-              {splitLines(form.stats_title, "规模化的\n制造实力").map((line, index, lines) => (
-                <span key={`${line}-${index}`}>
-                  {line}
-                  {index < lines.length - 1 && <br />}
-                </span>
-              ))}
-            </h3>
+            />
             <div className="mt-8 grid gap-px bg-white/10 sm:grid-cols-2 xl:grid-cols-4">
               {stats.map((item) => (
                 <div key={item.label} className="bg-navy-deep p-5">
@@ -672,18 +878,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.capabilities_eyebrow ?? "核心能力")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="capabilities_title"
+              value={String(form.capabilities_title ?? "我们的能力")}
+              onChange={(v) => setValue("capabilities_title", v)}
+              onSelect={() => setSelectedField("capabilities_title")}
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
               style={styleOf(fieldStyles, "capabilities_title")}
-            >
-              {String(form.capabilities_title ?? "我们的能力")}
-            </h3>
-            <p
+            />
+            <EditableText
+              fieldKey="capabilities_desc"
+              value={String(form.capabilities_desc ?? "")}
+              onChange={(v) => setValue("capabilities_desc", v)}
+              onSelect={() => setSelectedField("capabilities_desc")}
+              multiline
+              as="p"
               className="mt-3 max-w-xl text-sm text-muted-foreground"
               style={styleOf(fieldStyles, "capabilities_desc")}
-            >
-              {String(form.capabilities_desc ?? "")}
-            </p>
+            />
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {previewCapabilities.slice(0, 4).map((item) => {
                 const Icon = getIcon(item.icon);
@@ -714,12 +927,15 @@ export function LiveEditorPanel({ token }: { token: string }) {
               <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
                 {String(form.clients_eyebrow ?? "合作伙伴")}
               </div>
-              <h3
+              <EditableText
+                fieldKey="clients_title"
+                value={String(form.clients_title ?? "服务客户")}
+                onChange={(v) => setValue("clients_title", v)}
+                onSelect={() => setSelectedField("clients_title")}
+                as="h3"
                 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl"
                 style={styleOf(fieldStyles, "clients_title")}
-              >
-                {String(form.clients_title ?? "服务客户")}
-              </h3>
+              />
             </div>
             <div className="mt-8 grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-6">
               {brands.map((brand, index) => (
@@ -765,12 +981,16 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.advantage_eyebrow ?? "我们的优势")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="advantage_title"
+              value={String(form.advantage_title ?? "核心优势")}
+              onChange={(v) => setValue("advantage_title", v)}
+              onSelect={() => setSelectedField("advantage_title")}
+              multiline
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl"
               style={styleOf(fieldStyles, "advantage_title")}
-            >
-              {String(form.advantage_title ?? "核心优势")}
-            </h3>
+            />
             <div className="mt-8 space-y-10">
               {items.map((item, index) => (
                 <div key={item.key} className="grid gap-6 lg:grid-cols-2 lg:items-center">
@@ -779,18 +999,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-[0.25em] text-mid-blue">{item.tag}</div>
-                    <div
+                    <EditableText
+                      fieldKey={`${item.key}_title`}
+                      value={item.title}
+                      onChange={(v) => setValue(`${item.key}_title`, v)}
+                      onSelect={() => setSelectedField(`${item.key}_title`)}
+                      as="div"
                       className="mt-3 font-display text-2xl font-bold text-navy-deep"
                       style={styleOf(fieldStyles, `${item.key}_title`)}
-                    >
-                      {item.title}
-                    </div>
-                    <div
+                    />
+                    <EditableText
+                      fieldKey={`${item.key}_desc`}
+                      value={item.desc}
+                      onChange={(v) => setValue(`${item.key}_desc`, v)}
+                      onSelect={() => setSelectedField(`${item.key}_desc`)}
+                      multiline
+                      as="div"
                       className="mt-4 text-sm leading-relaxed text-muted-foreground"
                       style={styleOf(fieldStyles, `${item.key}_desc`)}
-                    >
-                      {item.desc}
-                    </div>
+                    />
                   </div>
                 </div>
               ))}
@@ -831,28 +1058,37 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.cta_eyebrow ?? "携手共建")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="cta_title"
+              value={String(form.cta_title ?? "让我们助力您的下一个项目")}
+              onChange={(v) => setValue("cta_title", v)}
+              onSelect={() => setSelectedField("cta_title")}
+              multiline
+              as="h3"
               className="mt-5 font-display text-3xl font-bold leading-tight md:text-4xl"
               style={styleOf(fieldStyles, "cta_title")}
-            >
-              {splitLines(form.cta_title, "让我们助力您的下一个项目").map((line, index, lines) => (
-                <span key={`${line}-${index}`}>
-                  {line}
-                  {index < lines.length - 1 && <br />}
-                </span>
-              ))}
-            </h3>
-            <p
+            />
+            <EditableText
+              fieldKey="cta_desc"
+              value={String(form.cta_desc ?? "")}
+              onChange={(v) => setValue("cta_desc", v)}
+              onSelect={() => setSelectedField("cta_desc")}
+              multiline
+              as="p"
               className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-silver/80"
               style={styleOf(fieldStyles, "cta_desc")}
-            >
-              {String(form.cta_desc ?? "")}
-            </p>
+            />
             <span
               className="mt-7 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-medium text-navy-deep"
-              style={styleOf(fieldStyles, "cta_button")}
             >
-              {String(form.cta_button ?? "联系我们")}
+              <EditableText
+                fieldKey="cta_button"
+                value={String(form.cta_button ?? "联系我们")}
+                onChange={(v) => setValue("cta_button", v)}
+                onSelect={() => setSelectedField("cta_button")}
+                as="span"
+                style={styleOf(fieldStyles, "cta_button")}
+              />
               <ArrowRight size={14} />
             </span>
           </div>

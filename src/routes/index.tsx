@@ -38,8 +38,11 @@ const DEFAULT_BRANDS = ["SAMSUNG", "HUAWEI", "XIAOMI", "TRANSSION", "OPPO", "VIV
 type FieldStyle = {
   fontFamily?: string;
   fontSize?: number;
+  weight?: "normal" | "bold" | "black";
+  italic?: "normal" | "italic";
+  color?: string;
+  // legacy
   bold?: boolean;
-  italic?: boolean;
 };
 type FieldStyles = Record<string, FieldStyle>;
 
@@ -49,8 +52,13 @@ function styleOf(styles: FieldStyles | undefined, key: string): React.CSSPropert
   const css: React.CSSProperties = {};
   if (s.fontFamily) css.fontFamily = s.fontFamily;
   if (s.fontSize) css.fontSize = `${s.fontSize}px`;
-  if (s.bold) css.fontWeight = 700;
-  if (s.italic) css.fontStyle = "italic";
+  if (s.weight === "normal") css.fontWeight = 400;
+  else if (s.weight === "bold") css.fontWeight = 700;
+  else if (s.weight === "black") css.fontWeight = 900;
+  else if (s.bold) css.fontWeight = 700;
+  if (s.italic === "italic") css.fontStyle = "italic";
+  else if (s.italic === "normal") css.fontStyle = "normal";
+  if (s.color) css.color = s.color;
   return Object.keys(css).length ? css : undefined;
 }
 
