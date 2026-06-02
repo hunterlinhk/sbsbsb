@@ -843,17 +843,16 @@ export function LiveEditorPanel({ token }: { token: string }) {
             <div className="text-[10px] uppercase tracking-[0.3em] text-mid-blue">
               {String(form.stats_eyebrow ?? "数据见证")}
             </div>
-            <h3
+            <EditableText
+              fieldKey="stats_title"
+              value={String(form.stats_title ?? "规模化的\n制造实力")}
+              onChange={(v) => setValue("stats_title", v)}
+              onSelect={() => setSelectedField("stats_title")}
+              multiline
+              as="h3"
               className="mt-4 font-display text-3xl font-bold leading-tight md:text-4xl"
               style={styleOf(fieldStyles, "stats_title")}
-            >
-              {splitLines(form.stats_title, "规模化的\n制造实力").map((line, index, lines) => (
-                <span key={`${line}-${index}`}>
-                  {line}
-                  {index < lines.length - 1 && <br />}
-                </span>
-              ))}
-            </h3>
+            />
             <div className="mt-8 grid gap-px bg-white/10 sm:grid-cols-2 xl:grid-cols-4">
               {stats.map((item) => (
                 <div key={item.label} className="bg-navy-deep p-5">
