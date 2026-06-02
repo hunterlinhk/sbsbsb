@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Cpu, Factory, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
-import { Fragment, useMemo, useRef, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Render } from "@measured/puck";
 import { Counter } from "@/components/site/Counter";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
@@ -13,6 +14,8 @@ import qualityImg from "@/assets/quality.jpg";
 import coilImg from "@/assets/product-coil.jpg";
 import motorImg from "@/assets/product-motor.jpg";
 import { getHomeContent } from "@/lib/site.functions";
+import { puckConfig, isValidPuckData } from "@/lib/puck-config";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -67,6 +70,34 @@ function IndexPage() {
   const home = data?.home;
   const capabilities = data?.capabilities ?? [];
   const brands = (home?.brands as string[] | undefined) ?? DEFAULT_BRANDS;
+  const puckData = (home as Record<string, unknown> | undefined)?.puck_data;
+
+  // Load custom fonts saved in localStorage by the Puck editor (best-effort, browser-only).
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("custom-fonts");
+      if (raw) {
+        const fonts = JSON.parse(raw);
+        if (Array.isArray(fonts)) {
+          const styleId = "site-custom-fonts";
+          let el = document.getElementById(styleId) as HTMLStyleElement | null;
+          if (!el) {
+            el = document.createElement("style");
+            el.id = styleId;
+            document.head.appendChild(el);
+          }
+          el.textContent = fonts
+            .filter((f) => f && typeof f.name === "string" && typeof f.url === "string")
+            .map((f) => `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`)
+            .join("\n");
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setFontsReady(true);
+  }, []);
 
   const sectionOrder = useMemo(
     () => parseSectionOrder((home as Record<string, unknown> | undefined)?.section_order),
@@ -76,6 +107,26 @@ function IndexPage() {
     () => parseSectionVisibility((home as Record<string, unknown> | undefined)?.section_visibility),
     [home],
   );
+
+  // If a valid Puck data blob exists, render it instead of the legacy sections.
+  if (isValidPuckData(puckData)) {
+    try {
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <main>
+            <Render config={puckConfig} data={puckData} />
+          </main>
+          <Footer />
+        </div>
+      );
+    } catch (e) {
+      console.warn("[Home] Puck render failed, falling back to legacy sections", e);
+      // fall through to legacy render below
+    }
+  }
+
+  void fontsReady;
 
   const sections: Record<SectionId, ReactNode> = {
     hero: <Hero h={home} />,
@@ -98,6 +149,7 @@ function IndexPage() {
     </div>
   );
 }
+
 
 function Hero({ h }: { h: HomeData }) {
   const ref = useRef<HTMLDivElement>(null);

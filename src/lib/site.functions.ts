@@ -490,3 +490,65 @@ export const uploadImage = createServerFn({ method: "POST" })
     const { data: pub } = supabaseAdmin.storage.from("cms-images").getPublicUrl(path);
     return { url: pub.publicUrl };
   });
+
+// ====================== Puck (drag-and-drop) home data ======================
+
+export const getHomePuckData = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { data, error } = await supabaseAdmin
+      .from("home_content")
+      .select("puck_data")
+      .eq("id", 1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { puck_data: (data as { puck_data?: unknown } | null)?.puck_data ?? null };
+  },
+);
+
+export const saveHomePuckData = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    pw.extend({
+      puck_data: z.any().nullable(),
+    }).parse(i),
+  )
+  .handler(async ({ data }) => {
+    requireAdmin(data.password);
+    const { error } = await supabaseAdmin
+      .from("home_content")
+      .update({ puck_data: data.puck_data } as never)
+      .eq("id", 1);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ====================== Font upload ======================
+
+const ALLOWED_FONT_EXT = /\.(woff2|woff|ttf|otf)$/i;
+
+export const uploadFont = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    pw.extend({
+      filename: z.string().min(1).max(200),
+      contentType: z.string().min(1).max(100),
+      base64: z.string().min(1),
+    }).parse(i),
+  )
+  .handler(async ({ data }) => {
+    requireAdmin(data.password);
+    if (!ALLOWED_FONT_EXT.test(data.filename)) {
+      throw new Error("仅支持 .woff2 / .woff / .ttf / .otf 字体文件");
+    }
+    const buf = Buffer.from(data.base64, "base64");
+    if (buf.byteLength > 10 * 1024 * 1024) {
+      throw new Error("字体文件不能超过 10MB");
+    }
+    const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `fonts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
+    const { error } = await supabaseAdmin.storage
+      .from("cms-images")
+      .upload(path, buf, { contentType: data.contentType, upsert: false });
+    if (error) throw new Error(error.message);
+    const { data: pub } = supabaseAdmin.storage.from("cms-images").getPublicUrl(path);
+    return { url: pub.publicUrl };
+  });
+

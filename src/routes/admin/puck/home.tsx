@@ -28,9 +28,11 @@ function PuckHomePage() {
     <AdminShell
       title="拖拽编辑器"
       puckActive
+      wide
       onSelectTab={(tab) => navigate({ to: "/admin", search: { tab } })}
     >
       <PuckHomeEditor />
     </AdminShell>
   );
 }
+

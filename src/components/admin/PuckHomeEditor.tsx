@@ -1,383 +1,257 @@
-import { useEffect, useState } from "react";
-import { Puck, Render, type Config, type Data } from "@measured/puck";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Puck, Render, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
+import { puckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
+import { getAdminToken } from "@/lib/admin-auth";
+import { getHomePuckData, saveHomePuckData, uploadFont } from "@/lib/site.functions";
 
-const STORAGE_KEY = "puck-home-editor-prototype";
+const LOCAL_KEY = "puck-home-editor-prototype";
+const FONTS_KEY = "custom-fonts";
 
-// ============ Section render components (styled to mimic real homepage) ============
+type CustomFont = { name: string; url: string };
 
-type HeroProps = {
-  eyebrow: string;
-  titleLine1: string;
-  titleLine2: string;
-  intro: string;
-  image: string;
-  primaryButtonText: string;
-  primaryButtonLink: string;
-  secondaryButtonText: string;
-  secondaryButtonLink: string;
-};
-
-function HeroRender(p: HeroProps) {
-  return (
-    <section className="relative overflow-hidden bg-navy-deep text-white" style={{ minHeight: 560 }}>
-      {p.image && (
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: `url(${p.image})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep via-navy-deep/80 to-navy-deep/30" />
-      <div className="relative mx-auto flex max-w-7xl flex-col px-6 py-24 lg:py-32">
-        <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-silver/90">
-          <span className="h-1.5 w-1.5 rounded-full bg-mid-blue" />
-          {p.eyebrow}
-        </div>
-        <h1 className="font-display text-5xl font-bold leading-tight md:text-6xl">
-          {p.titleLine1}
-          <br />
-          <span className="text-mid-blue">{p.titleLine2}</span>
-        </h1>
-        <p className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg">{p.intro}</p>
-        <div className="mt-10 flex flex-wrap gap-4">
-          {p.primaryButtonText && (
-            <a href={p.primaryButtonLink || "#"} className="inline-flex items-center gap-2 bg-mid-blue px-7 py-4 text-sm font-medium text-white hover:bg-mid-blue/90">
-              {p.primaryButtonText}
-            </a>
-          )}
-          {p.secondaryButtonText && (
-            <a href={p.secondaryButtonLink || "#"} className="inline-flex items-center gap-2 border border-white/30 px-7 py-4 text-sm font-medium text-white hover:bg-white/10">
-              {p.secondaryButtonText}
-            </a>
-          )}
-        </div>
-      </div>
-    </section>
-  );
+function loadFontsFromStorage(): CustomFont[] {
+  try {
+    const raw = localStorage.getItem(FONTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((f) => f && typeof f.name === "string" && typeof f.url === "string");
+  } catch {
+    return [];
+  }
 }
 
-type StatsProps = {
-  title: string;
-  stat1Value: string; stat1Label: string;
-  stat2Value: string; stat2Label: string;
-  stat3Value: string; stat3Label: string;
-  stat4Value: string; stat4Label: string;
-};
-
-function StatsRender(p: StatsProps) {
-  const stats = [
-    { v: p.stat1Value, l: p.stat1Label },
-    { v: p.stat2Value, l: p.stat2Label },
-    { v: p.stat3Value, l: p.stat3Label },
-    { v: p.stat4Value, l: p.stat4Label },
-  ];
-  return (
-    <section className="bg-navy-deep py-24 text-white lg:py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 text-center">
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">By the numbers</div>
-          <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">{p.title}</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
-          {stats.map((s, i) => (
-            <div key={i} className="flex flex-col gap-4 bg-navy-deep p-8 lg:p-10">
-              <div className="font-display text-4xl font-bold text-white md:text-5xl">{s.v}</div>
-              <div className="h-px w-12 bg-mid-blue" />
-              <div className="text-sm text-silver/70">{s.l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+function injectFontFaces(fonts: CustomFont[]) {
+  const styleId = "puck-custom-fonts";
+  let el = document.getElementById(styleId) as HTMLStyleElement | null;
+  if (!el) {
+    el = document.createElement("style");
+    el.id = styleId;
+    document.head.appendChild(el);
+  }
+  el.textContent = fonts
+    .map(
+      (f) => `@font-face { font-family: "${f.name.replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
+    )
+    .join("\n");
 }
 
-type CapProps = { eyebrow: string; title: string; description: string };
-function CapabilitiesRender(p: CapProps) {
-  const cards = ["精密加工", "表面处理", "智能装配", "质量检测"];
-  return (
-    <section className="bg-white py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{p.eyebrow}</div>
-        <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl">{p.title}</h2>
-        <p className="mt-4 max-w-3xl text-muted-foreground">{p.description}</p>
-        <div className="mt-12 grid grid-cols-1 gap-px bg-silver/40 md:grid-cols-2 lg:grid-cols-4">
-          {cards.map((c, i) => (
-            <div key={i} className="bg-white p-8">
-              <div className="h-8 w-8 bg-mid-blue" />
-              <h3 className="mt-6 font-display text-xl font-bold text-navy-deep">{c}</h3>
-              <p className="mt-3 text-sm text-muted-foreground">面向消费电子的高精度制造方案。</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+function fileToBase64(file: File): Promise<{ base64: string; contentType: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const r = reader.result as string;
+      const base64 = r.split(",")[1] ?? "";
+      resolve({ base64, contentType: file.type || "application/octet-stream" });
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 }
-
-type ClientsProps = { eyebrow: string; title: string; brands: string };
-function ClientsRender(p: ClientsProps) {
-  const list = (p.brands || "").split(",").map((s) => s.trim()).filter(Boolean);
-  return (
-    <section className="bg-silver/40 py-20">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-10">
-          <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{p.eyebrow}</div>
-          <h2 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl">{p.title}</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-px bg-silver/60 md:grid-cols-3 lg:grid-cols-6">
-          {list.map((b, i) => (
-            <div key={i} className="flex h-24 items-center justify-center bg-silver/40 font-display text-lg font-bold tracking-widest text-navy/60">
-              {b}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-type AdvProps = {
-  eyebrow: string; title: string;
-  card1Title: string; card1Desc: string; card1Image: string;
-  card2Title: string; card2Desc: string; card2Image: string;
-};
-function AdvantageRender(p: AdvProps) {
-  const cards = [
-    { t: p.card1Title, d: p.card1Desc, i: p.card1Image },
-    { t: p.card2Title, d: p.card2Desc, i: p.card2Image },
-  ];
-  return (
-    <section className="bg-white py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{p.eyebrow}</div>
-        <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl">{p.title}</h2>
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          {cards.map((c, i) => (
-            <div key={i} className="overflow-hidden bg-silver/30">
-              {c.i && <div className="h-64 bg-cover bg-center" style={{ backgroundImage: `url(${c.i})` }} />}
-              <div className="p-8">
-                <h3 className="font-display text-2xl font-bold text-navy-deep">{c.t}</h3>
-                <p className="mt-3 text-muted-foreground">{c.d}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-type CtaProps = { eyebrow: string; title: string; description: string; buttonText: string; buttonLink: string };
-function CtaRender(p: CtaProps) {
-  return (
-    <section className="relative overflow-hidden bg-navy-deep py-24 text-white lg:py-32">
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/20 to-transparent" />
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <div className="text-xs uppercase tracking-[0.3em] text-mid-blue">{p.eyebrow}</div>
-        <h2 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl">{p.title}</h2>
-        <p className="mx-auto mt-8 max-w-2xl text-base text-silver/80">{p.description}</p>
-        {p.buttonText && (
-          <a href={p.buttonLink || "#"} className="mt-10 inline-flex items-center gap-2 bg-white px-8 py-4 text-sm font-medium text-navy-deep hover:bg-silver">
-            {p.buttonText}
-          </a>
-        )}
-      </div>
-    </section>
-  );
-}
-
-// ============ Puck config ============
-
-export const puckConfig: Config = {
-  components: {
-    HeroSection: {
-      label: "首页 Hero 大图区块",
-      fields: {
-        eyebrow: { type: "text", label: "小标 (eyebrow)" },
-        titleLine1: { type: "text", label: "主标第一行" },
-        titleLine2: { type: "text", label: "主标第二行" },
-        intro: { type: "textarea", label: "简介" },
-        image: { type: "text", label: "背景图片 URL" },
-        primaryButtonText: { type: "text", label: "主按钮文字" },
-        primaryButtonLink: { type: "text", label: "主按钮连结" },
-        secondaryButtonText: { type: "text", label: "次按钮文字" },
-        secondaryButtonLink: { type: "text", label: "次按钮连结" },
-      },
-      defaultProps: {
-        eyebrow: "JINGHONG TECHNOLOGY",
-        titleLine1: "高精度制造",
-        titleLine2: "驱动智能未来",
-        intro: "景鸿科技专注于消费电子精密制造，为全球品牌客户提供从研发到量产的一体化解决方案。",
-        image: "",
-        primaryButtonText: "了解产品",
-        primaryButtonLink: "/products",
-        secondaryButtonText: "联系我们",
-        secondaryButtonLink: "/contact",
-      },
-      render: HeroRender as any,
-    },
-    StatsSection: {
-      label: "数据统计区块",
-      fields: {
-        title: { type: "text", label: "标题" },
-        stat1Value: { type: "text", label: "数据 1 数值" },
-        stat1Label: { type: "text", label: "数据 1 标签" },
-        stat2Value: { type: "text", label: "数据 2 数值" },
-        stat2Label: { type: "text", label: "数据 2 标签" },
-        stat3Value: { type: "text", label: "数据 3 数值" },
-        stat3Label: { type: "text", label: "数据 3 标签" },
-        stat4Value: { type: "text", label: "数据 4 数值" },
-        stat4Label: { type: "text", label: "数据 4 标签" },
-      },
-      defaultProps: {
-        title: "用数据说话",
-        stat1Value: "120,000m²", stat1Label: "厂房面积",
-        stat2Value: "1,500+", stat2Label: "员工团队",
-        stat3Value: "800+", stat3Label: "精密设备",
-        stat4Value: "50M+", stat4Label: "年产能",
-      },
-      render: StatsRender as any,
-    },
-    CapabilitiesSection: {
-      label: "核心制造能力",
-      fields: {
-        eyebrow: { type: "text", label: "小标" },
-        title: { type: "text", label: "标题" },
-        description: { type: "textarea", label: "描述" },
-      },
-      defaultProps: {
-        eyebrow: "Core Capabilities",
-        title: "四大核心制造能力",
-        description: "覆盖从原型到量产的全制造链路，精密加工、表面处理、智能装配、质量检测一体化。",
-      },
-      render: CapabilitiesRender as any,
-    },
-    ClientsSection: {
-      label: "客户品牌区块",
-      fields: {
-        eyebrow: { type: "text", label: "小标" },
-        title: { type: "text", label: "标题" },
-        brands: { type: "textarea", label: "品牌列表 (逗号分隔)" },
-      },
-      defaultProps: {
-        eyebrow: "Trusted Partners",
-        title: "合作品牌",
-        brands: "SAMSUNG,HUAWEI,XIAOMI,TRANSSION,OPPO,VIVO",
-      },
-      render: ClientsRender as any,
-    },
-    AdvantageSection: {
-      label: "优势对比区块",
-      fields: {
-        eyebrow: { type: "text", label: "小标" },
-        title: { type: "text", label: "标题" },
-        card1Title: { type: "text", label: "卡片 1 标题" },
-        card1Desc: { type: "textarea", label: "卡片 1 描述" },
-        card1Image: { type: "text", label: "卡片 1 图片 URL" },
-        card2Title: { type: "text", label: "卡片 2 标题" },
-        card2Desc: { type: "textarea", label: "卡片 2 描述" },
-        card2Image: { type: "text", label: "卡片 2 图片 URL" },
-      },
-      defaultProps: {
-        eyebrow: "Our Advantage",
-        title: "为什么选择景鸿",
-        card1Title: "智能化车间",
-        card1Desc: "全自动产线 + 数字化品控，保障稳定交付。",
-        card1Image: "",
-        card2Title: "全球客户验证",
-        card2Desc: "服务全球头部消费电子品牌十余年。",
-        card2Image: "",
-      },
-      render: AdvantageRender as any,
-    },
-    CtaSection: {
-      label: "底部 CTA 区块",
-      fields: {
-        eyebrow: { type: "text", label: "小标" },
-        title: { type: "text", label: "标题" },
-        description: { type: "textarea", label: "描述" },
-        buttonText: { type: "text", label: "按钮文字" },
-        buttonLink: { type: "text", label: "按钮连结" },
-      },
-      defaultProps: {
-        eyebrow: "Let's Build Together",
-        title: "携手共创智能制造未来",
-        description: "无论您正在研发新产品，还是寻找稳定的量产伙伴，我们都欢迎与您深入交流。",
-        buttonText: "联系我们",
-        buttonLink: "/contact",
-      },
-      render: CtaRender as any,
-    },
-  },
-};
-
-// ============ Default data ============
-
-const defaultData: Data = {
-  content: [
-    { type: "HeroSection", props: { id: "hero-1", ...(puckConfig.components.HeroSection.defaultProps as object) } },
-    { type: "StatsSection", props: { id: "stats-1", ...(puckConfig.components.StatsSection.defaultProps as object) } },
-    { type: "CapabilitiesSection", props: { id: "caps-1", ...(puckConfig.components.CapabilitiesSection.defaultProps as object) } },
-    { type: "ClientsSection", props: { id: "clients-1", ...(puckConfig.components.ClientsSection.defaultProps as object) } },
-    { type: "AdvantageSection", props: { id: "adv-1", ...(puckConfig.components.AdvantageSection.defaultProps as object) } },
-    { type: "CtaSection", props: { id: "cta-1", ...(puckConfig.components.CtaSection.defaultProps as object) } },
-  ],
-  root: { props: {} },
-} as Data;
-
-// ============ Main editor component ============
 
 export function PuckHomeEditor() {
   const [initialData, setInitialData] = useState<Data | null>(null);
   const [previewData, setPreviewData] = useState<Data | null>(null);
+  const [currentData, setCurrentData] = useState<Data | null>(null);
   const [toast, setToast] = useState<{ type: "ok" | "err"; msg: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [fonts, setFonts] = useState<CustomFont[]>([]);
+  const [newFontName, setNewFontName] = useState("");
 
+  // Load fonts & data on mount
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Data;
-        setInitialData(parsed);
-        setPreviewData(parsed);
-        return;
+    const f = loadFontsFromStorage();
+    setFonts(f);
+    injectFontFaces(f);
+    (async () => {
+      try {
+        const { puck_data } = await getHomePuckData();
+        if (isValidPuckData(puck_data)) {
+          setInitialData(puck_data);
+          setPreviewData(puck_data);
+          setCurrentData(puck_data);
+          return;
+        }
+      } catch (e) {
+        console.warn("[Puck] 读取远程数据失败，尝试本地草稿", e);
       }
-    } catch {
-      // ignore
-    }
-    setInitialData(defaultData);
-    setPreviewData(defaultData);
+      try {
+        const raw = localStorage.getItem(LOCAL_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as Data;
+          if (isValidPuckData(parsed)) {
+            setInitialData(parsed);
+            setPreviewData(parsed);
+            setCurrentData(parsed);
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      }
+      setInitialData(defaultPuckData);
+      setPreviewData(defaultPuckData);
+      setCurrentData(defaultPuckData);
+    })();
   }, []);
 
-  const handlePublish = (data: Data) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      setPreviewData(data);
-      setToast({ type: "ok", msg: "原型已保存" });
-    } catch {
-      setToast({ type: "err", msg: "保存失败，请稍后重试" });
-    }
+  const showToast = useCallback((type: "ok" | "err", msg: string) => {
+    setToast({ type, msg });
     setTimeout(() => setToast(null), 2500);
-  };
+  }, []);
+
+  const handleChange = useCallback((data: Data) => {
+    setCurrentData(data);
+  }, []);
+
+  const handleSaveDraft = useCallback(async () => {
+    if (!currentData) return;
+    setBusy(true);
+    try {
+      try {
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(currentData));
+      } catch {/* quota */}
+      const token = getAdminToken();
+      if (token) {
+        await saveHomePuckData({ data: { password: token, puck_data: currentData } });
+      }
+      setPreviewData(currentData);
+      showToast("ok", "草稿已保存");
+    } catch (e) {
+      showToast("err", `保存草稿失败：${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }, [currentData, showToast]);
+
+  const handlePublish = useCallback(async () => {
+    if (!currentData) return;
+    setBusy(true);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error("未登录");
+      await saveHomePuckData({ data: { password: token, puck_data: currentData } });
+      try {
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(currentData));
+      } catch {/* quota */}
+      setPreviewData(currentData);
+      showToast("ok", "已发布到首页");
+    } catch (e) {
+      showToast("err", `发布失败：${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }, [currentData, showToast]);
+
+  const handleRevertToFallback = useCallback(async () => {
+    if (!confirm("确定将线上首页恢复为旧版渲染逻辑？（清除拖拽数据）")) return;
+    setBusy(true);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error("未登录");
+      await saveHomePuckData({ data: { password: token, puck_data: null } });
+      showToast("ok", "已恢复为旧版渲染");
+    } catch (e) {
+      showToast("err", `操作失败：${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }, [showToast]);
+
+  const handleFontUpload = useCallback(async (file: File) => {
+    if (!newFontName.trim()) {
+      showToast("err", "请先填写字体名称");
+      return;
+    }
+    if (!/\.(woff2|woff|ttf|otf)$/i.test(file.name)) {
+      showToast("err", "仅支持 .woff2 / .woff / .ttf / .otf");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast("err", "字体文件不能超过 10MB");
+      return;
+    }
+    const token = getAdminToken();
+    if (!token) {
+      showToast("err", "未登录");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { base64, contentType } = await fileToBase64(file);
+      const { url } = await uploadFont({
+        data: { password: token, filename: file.name, contentType, base64 },
+      });
+      const next = [...fonts.filter((f) => f.name !== newFontName.trim()), { name: newFontName.trim(), url }];
+      setFonts(next);
+      localStorage.setItem(FONTS_KEY, JSON.stringify(next));
+      injectFontFaces(next);
+      setNewFontName("");
+      showToast("ok", "字体已上传");
+    } catch (e) {
+      showToast("err", `上传失败：${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }, [fonts, newFontName, showToast]);
+
+  const handleRemoveFont = useCallback((name: string) => {
+    const next = fonts.filter((f) => f.name !== name);
+    setFonts(next);
+    localStorage.setItem(FONTS_KEY, JSON.stringify(next));
+    injectFontFaces(next);
+  }, [fonts]);
+
+  const fontListText = useMemo(
+    () => (fonts.length === 0 ? "暂无自定义字体，上传后可在区块字段中填写字体名称使用。" : ""),
+    [fonts],
+  );
 
   if (!initialData) {
     return <div className="p-8 text-sm text-muted-foreground">加载中…</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-sm border border-border bg-white p-6">
-        <h2 className="font-display text-xl font-bold text-navy-deep">首页拖拽编辑器原型</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          这是 Puck 拖拽编辑器原型，暂时不会影响线上首页。确认稳定后，下一阶段再接入正式首页。
-        </p>
-        <p className="mt-2 text-xs text-mid-blue">
-          当前保存到浏览器本地，不影响线上首页。
-        </p>
+    <div className="space-y-4">
+      <style>{`
+        /* Make Puck preview elements feel clickable */
+        .puck-preview-hover [data-puck-component]:hover { outline: 2px dashed #3b82f6; outline-offset: 2px; cursor: pointer; }
+      `}</style>
+
+      <div className="rounded-sm border border-border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-navy-deep">首页拖拽编辑器</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              发布前仅在编辑器中预览；点击"发布到首页"后，线上首页将使用拖拽编辑器内容。
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleSaveDraft}
+              disabled={busy}
+              className="border border-border bg-white px-4 py-2 text-sm text-navy-deep hover:bg-silver/30 disabled:opacity-50"
+            >
+              保存草稿
+            </button>
+            <button
+              onClick={handlePublish}
+              disabled={busy}
+              className="bg-mid-blue px-4 py-2 text-sm font-medium text-white hover:bg-mid-blue/90 disabled:opacity-50"
+            >
+              发布到首页
+            </button>
+            <button
+              onClick={handleRevertToFallback}
+              disabled={busy}
+              className="border border-border bg-white px-3 py-2 text-xs text-muted-foreground hover:bg-silver/30 disabled:opacity-50"
+              title="清除拖拽数据，前台首页恢复使用旧版渲染逻辑"
+            >
+              恢复旧版渲染
+            </button>
+          </div>
+        </div>
       </div>
 
       {toast && (
@@ -392,23 +266,83 @@ export function PuckHomeEditor() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-sm border border-border bg-white" style={{ height: "80vh" }}>
+      {/* Fonts panel */}
+      <div className="rounded-sm border border-border bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-navy-deep">字体设置</h3>
+          <span className="text-xs text-muted-foreground">支持 .woff2 / .woff / .ttf / .otf，单个文件 ≤ 10MB</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            placeholder="字体名称（例如 MyBrandFont）"
+            value={newFontName}
+            onChange={(e) => setNewFontName(e.target.value)}
+            className="border border-border bg-white px-3 py-2 text-sm"
+          />
+          <label className="cursor-pointer border border-border bg-white px-3 py-2 text-sm text-navy-deep hover:bg-silver/30">
+            选择字体文件
+            <input
+              type="file"
+              accept=".woff2,.woff,.ttf,.otf"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFontUpload(f);
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+        </div>
+        {fontListText && <p className="mt-3 text-xs text-muted-foreground">{fontListText}</p>}
+        {fonts.length > 0 && (
+          <ul className="mt-3 space-y-2">
+            {fonts.map((f) => (
+              <li key={f.name} className="flex items-center justify-between border border-border bg-silver/20 px-3 py-2 text-sm">
+                <div>
+                  <span className="font-mono text-xs text-muted-foreground">{f.name}</span>
+                  <span className="ml-3 text-base" style={{ fontFamily: `"${f.name}"` }}>
+                    预览：景鸿科技 The quick brown fox 1234567890
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleRemoveFont(f.name)}
+                  className="text-xs text-red-600 hover:underline"
+                >
+                  移除
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-3 text-xs text-mid-blue">
+          在每个区块的"标题字体 / 正文字体"字段中填写上方字体名称即可应用。
+        </p>
+      </div>
+
+      {/* Puck editor */}
+      <div
+        className="overflow-hidden rounded-sm border border-border bg-white puck-preview-hover"
+        style={{ height: "calc(100vh - 160px)", minHeight: 700 }}
+      >
         <Puck
           config={puckConfig}
           data={initialData}
-          onPublish={handlePublish}
+          onChange={handleChange}
+          onPublish={handleSaveDraft}
           overrides={{
             puck: ({ children }) => <div className="h-full">{children}</div>,
           }}
-          headerTitle="首页拖拽编辑器原型"
-          headerPath="保存后将写入浏览器本地"
+          headerTitle="首页拖拽编辑器"
+          headerPath="点击右上角保存草稿 / 发布到首页"
         />
       </div>
 
-      <div className="rounded-sm border border-border bg-white p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold text-navy-deep">渲染预览</h3>
-          <span className="text-xs text-muted-foreground">使用 Puck Render 渲染最近一次保存的数据</span>
+      {/* Render preview */}
+      <div className="rounded-sm border border-border bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-navy-deep">渲染预览（最近一次保存）</h3>
+          <span className="text-xs text-muted-foreground">该预览即发布后线上首页的样子</span>
         </div>
         <div className="overflow-hidden rounded-sm border border-border">
           {previewData && <Render config={puckConfig} data={previewData} />}
