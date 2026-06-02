@@ -39,12 +39,14 @@ export function AdminShell({
   title,
   activeTab,
   liveEditorActive = false,
+  puckActive = false,
   onSelectTab,
   children,
 }: {
   title: string;
   activeTab?: AdminTabId;
   liveEditorActive?: boolean;
+  puckActive?: boolean;
   onSelectTab?: (tab: AdminTabId) => void;
   children: ReactNode;
 }) {
@@ -77,7 +79,7 @@ export function AdminShell({
           <nav className="sticky top-24 space-y-1">
             {ADMIN_TABS.map((t) => {
               const Icon = t.icon;
-              const active = !liveEditorActive && activeTab === t.id;
+              const active = !liveEditorActive && !puckActive && activeTab === t.id;
               return (
                 <button
                   key={t.id}
@@ -102,6 +104,17 @@ export function AdminShell({
               }`}
             >
               <PanelsTopLeft size={16} /> 可视化编辑
+            </Link>
+
+            <Link
+              to="/admin/puck/home"
+              className={`flex w-full items-center gap-3 border-l-2 px-4 py-3 text-sm transition-colors ${
+                puckActive
+                  ? "border-navy-deep bg-white font-medium text-navy-deep"
+                  : "border-transparent text-muted-foreground hover:bg-white hover:text-navy-deep"
+              }`}
+            >
+              <PanelsTopLeft size={16} /> 拖拽编辑器
             </Link>
           </nav>
         </aside>
