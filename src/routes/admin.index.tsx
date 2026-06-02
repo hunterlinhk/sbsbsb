@@ -8,7 +8,7 @@ import { NewsPanel } from "@/components/admin/NewsPanel";
 import { InquiriesPanel } from "@/components/admin/InquiriesPanel";
 import { ADMIN_TABS, AdminShell, type AdminTabId } from "@/components/admin/AdminShell";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   validateSearch: (search: Record<string, unknown>) => ({
     tab: typeof search.tab === "string" ? search.tab : undefined,
   }),
