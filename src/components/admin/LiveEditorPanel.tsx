@@ -101,10 +101,26 @@ type FieldStyle = {
   fontSize?: number;
   weight?: "normal" | "bold" | "black";
   italic?: "normal" | "italic";
+  color?: string;
   // legacy field, still honored for previously-saved data
   bold?: boolean;
 };
 type FieldStyles = Record<string, FieldStyle>;
+
+const COLOR_SWATCHES: { label: string; value: string }[] = [
+  { label: "深海军蓝", value: "#0f1b3d" },
+  { label: "靛蓝", value: "#1e3a5f" },
+  { label: "中蓝", value: "#3b6fa0" },
+  { label: "银", value: "#e8edf3" },
+  { label: "白", value: "#ffffff" },
+  { label: "黑", value: "#000000" },
+  { label: "灰", value: "#6b7280" },
+  { label: "红", value: "#ef4444" },
+  { label: "橙", value: "#f59e0b" },
+  { label: "绿", value: "#22c55e" },
+  { label: "青", value: "#06b6d4" },
+  { label: "紫", value: "#8b5cf6" },
+];
 
 const PREV_SNAPSHOT_KEY = "home-content-prev-snapshot";
 
