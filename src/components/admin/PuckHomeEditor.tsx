@@ -331,7 +331,7 @@ export function PuckHomeEditor() {
           </ul>
         )}
         <p className="mt-3 text-xs text-mid-blue">
-          在每个区块的"标题字体 / 正文字体"字段中填写上方字体名称即可应用。
+          上传后，字体会自动出现在每个区块的"标题字体 / 正文字体"下拉菜单中（标记为"自定义"）。
         </p>
       </div>
 
