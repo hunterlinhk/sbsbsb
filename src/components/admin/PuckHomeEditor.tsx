@@ -219,7 +219,7 @@ export const puckConfig: Config = {
         secondaryButtonText: "联系我们",
         secondaryButtonLink: "/contact",
       },
-      render: HeroRender,
+      render: HeroRender as any,
     },
     StatsSection: {
       label: "数据统计区块",
@@ -241,7 +241,7 @@ export const puckConfig: Config = {
         stat3Value: "800+", stat3Label: "精密设备",
         stat4Value: "50M+", stat4Label: "年产能",
       },
-      render: StatsRender,
+      render: StatsRender as any,
     },
     CapabilitiesSection: {
       label: "核心制造能力",
@@ -255,7 +255,7 @@ export const puckConfig: Config = {
         title: "四大核心制造能力",
         description: "覆盖从原型到量产的全制造链路，精密加工、表面处理、智能装配、质量检测一体化。",
       },
-      render: CapabilitiesRender,
+      render: CapabilitiesRender as any,
     },
     ClientsSection: {
       label: "客户品牌区块",
@@ -269,7 +269,7 @@ export const puckConfig: Config = {
         title: "合作品牌",
         brands: "SAMSUNG,HUAWEI,XIAOMI,TRANSSION,OPPO,VIVO",
       },
-      render: ClientsRender,
+      render: ClientsRender as any,
     },
     AdvantageSection: {
       label: "优势对比区块",
@@ -293,7 +293,7 @@ export const puckConfig: Config = {
         card2Desc: "服务全球头部消费电子品牌十余年。",
         card2Image: "",
       },
-      render: AdvantageRender,
+      render: AdvantageRender as any,
     },
     CtaSection: {
       label: "底部 CTA 区块",
@@ -311,7 +311,7 @@ export const puckConfig: Config = {
         buttonText: "联系我们",
         buttonLink: "/contact",
       },
-      render: CtaRender,
+      render: CtaRender as any,
     },
   },
 };
