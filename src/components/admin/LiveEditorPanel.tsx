@@ -411,10 +411,18 @@ export function LiveEditorPanel({ token }: { token: string }) {
 
   const setFieldStyle = (key: string, style: FieldStyle) => {
     const next: FieldStyles = { ...fieldStyles };
-    if (!style || Object.keys(style).length === 0) {
+    // prune keys whose value is undefined
+    const cleaned: FieldStyle = {};
+    (Object.keys(style) as (keyof FieldStyle)[]).forEach((k) => {
+      const v = style[k];
+      if (v !== undefined && v !== "" && !(typeof v === "boolean" && v === false)) {
+        (cleaned as Record<string, unknown>)[k] = v;
+      }
+    });
+    if (Object.keys(cleaned).length === 0) {
       delete next[key];
     } else {
-      next[key] = style;
+      next[key] = cleaned;
     }
     setValue("field_styles", next);
   };
@@ -431,9 +439,27 @@ export function LiveEditorPanel({ token }: { token: string }) {
     setValue("section_order", next);
   };
 
+  const [hasSnapshot, setHasSnapshot] = useState(false);
+  useEffect(() => {
+    try {
+      setHasSnapshot(!!localStorage.getItem(PREV_SNAPSHOT_KEY));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const save = async () => {
     setSaving(true);
     try {
+      // Snapshot the last-known-saved DB state so the user can revert.
+      try {
+        if (data?.home) {
+          localStorage.setItem(PREV_SNAPSHOT_KEY, JSON.stringify(data.home));
+          setHasSnapshot(true);
+        }
+      } catch {
+        /* ignore quota */
+      }
       await saveHomeLiveEditor({
         data: {
           password: token,
@@ -445,7 +471,7 @@ export function LiveEditorPanel({ token }: { token: string }) {
           },
         },
       });
-      toast.success("已保存");
+      toast.success("已保存（可在底部点“恢复上一版本”回滚）");
       qc.invalidateQueries({ queryKey: ["home-content"] });
       qc.invalidateQueries({ queryKey: ["admin-home"] });
       qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
@@ -455,6 +481,24 @@ export function LiveEditorPanel({ token }: { token: string }) {
       setSaving(false);
     }
   };
+
+  const restorePrevious = () => {
+    try {
+      const raw = localStorage.getItem(PREV_SNAPSHOT_KEY);
+      if (!raw) {
+        toast.error("没有可恢复的版本");
+        return;
+      }
+      const prev = JSON.parse(raw);
+      if (prev && typeof prev === "object") {
+        setForm(prev as Record<string, unknown>);
+        toast.success("已载入上一版本，点击“保存”后才会生效");
+      }
+    } catch {
+      toast.error("恢复失败：快照已损坏");
+    }
+  };
+
 
   if (isLoading) {
     return (
