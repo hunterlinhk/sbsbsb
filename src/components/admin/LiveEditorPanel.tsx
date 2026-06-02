@@ -421,8 +421,37 @@ function FontControls({
       </div>
 
       <div className="flex items-center gap-2">
-        <Bold size={12} className="text-muted-foreground" />
-        <Italic size={12} className="text-muted-foreground" />
+        <button
+          type="button"
+          onClick={() =>
+            update({
+              weight: (value.weight === "bold" || value.bold) ? "normal" : "bold",
+              bold: undefined,
+            })
+          }
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.weight === "bold" || value.bold
+              ? "border-mid-blue bg-mid-blue text-white"
+              : "border-border bg-white text-navy-deep"
+          }`}
+          title="快捷加粗（再次点击切回常规）"
+        >
+          <Bold size={12} /> 加粗
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            update({ italic: value.italic === "italic" ? "normal" : "italic" })
+          }
+          className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs ${
+            value.italic === "italic"
+              ? "border-mid-blue bg-mid-blue text-white"
+              : "border-border bg-white text-navy-deep"
+          }`}
+          title="快捷斜体（再次点击切回正常）"
+        >
+          <Italic size={12} /> 斜体
+        </button>
         <button
           type="button"
           onClick={() => onChange({})}
@@ -430,6 +459,56 @@ function FontControls({
         >
           清空样式
         </button>
+      </div>
+
+      <div>
+        <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+          <span>文字颜色</span>
+          <span>{value.color ?? "默认（继承）"}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="color"
+            value={value.color ?? "#0f1b3d"}
+            onChange={(e) => update({ color: e.target.value })}
+            className="h-8 w-10 cursor-pointer border border-border bg-white p-0"
+            title="自定义颜色"
+          />
+          <input
+            type="text"
+            value={value.color ?? ""}
+            placeholder="#hex"
+            onChange={(e) => {
+              const v = e.target.value.trim();
+              update({ color: v || undefined });
+            }}
+            className="w-24 border border-border bg-white px-2 py-1 font-mono text-xs"
+          />
+          <button
+            type="button"
+            onClick={() => update({ color: undefined })}
+            className="border border-border bg-white px-2 py-1 text-xs text-muted-foreground"
+          >
+            清除
+          </button>
+        </div>
+        <div className="mt-2 grid grid-cols-6 gap-1.5">
+          {COLOR_SWATCHES.map((c) => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => update({ color: c.value })}
+              title={`${c.label} ${c.value}`}
+              aria-label={c.label}
+              className={`h-7 w-full border ${
+                value.color?.toLowerCase() === c.value.toLowerCase()
+                  ? "border-mid-blue ring-2 ring-mid-blue/40"
+                  : "border-border"
+              }`}
+              style={{ backgroundColor: c.value }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
