@@ -990,7 +990,25 @@ export function LiveEditorPanel({ token }: { token: string }) {
           </div>
         </div>
 
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border border-border bg-white px-4 py-3">
+            <div className="text-sm text-navy-deep">
+              <span className="font-semibold">版本回滚：</span>
+              <span className="text-muted-foreground">
+                {hasSnapshot
+                  ? "可恢复到上一次保存前的版本。点击恢复后，仍需点“保存”才会生效。"
+                  : "尚无可恢复版本。每次保存都会自动备份上一版本。"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={restorePrevious}
+              disabled={!hasSnapshot}
+              className="border border-border bg-white px-3 py-1.5 text-sm text-navy-deep disabled:opacity-40"
+            >
+              恢复上一版本
+            </button>
+          </div>
           <SaveBar saving={saving} onSave={save} label="保存可视化编辑器修改" />
         </div>
       </div>
