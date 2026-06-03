@@ -522,6 +522,27 @@ export const saveHomePuckData = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateCustomFonts = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    pw.extend({
+      fonts: z.array(
+        z.object({
+          name: z.string().min(1).max(100),
+          url: z.string().url().max(1000),
+        }),
+      ).max(20),
+    }).parse(i),
+  )
+  .handler(async ({ data }) => {
+    requireAdmin(data.password);
+    const { error } = await supabaseAdmin
+      .from("home_content")
+      .update({ custom_fonts: data.fonts } as never)
+      .eq("id", 1);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // ====================== Font upload ======================
 
 const ALLOWED_FONT_EXT = /\.(woff2|woff|ttf|otf)$/i;
