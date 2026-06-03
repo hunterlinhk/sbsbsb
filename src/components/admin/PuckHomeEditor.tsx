@@ -61,10 +61,27 @@ export function PuckHomeEditor() {
 
   // Load fonts & data on mount
   useEffect(() => {
-    const f = loadFontsFromStorage();
-    setFonts(f);
-    injectFontFaces(f);
     (async () => {
+      // Prefer fonts from DB (server-side preloadable), fall back to localStorage
+      let dbFonts: CustomFont[] = [];
+      try {
+        const { home } = await getHomeContent();
+        const raw = (home as { custom_fonts?: unknown } | null)?.custom_fonts;
+        if (Array.isArray(raw)) {
+          dbFonts = (raw as CustomFont[]).filter(
+            (f) => f && typeof f.name === "string" && typeof f.url === "string",
+          );
+        }
+      } catch {
+        // ignore
+      }
+      const merged = dbFonts.length > 0 ? dbFonts : loadFontsFromStorage();
+      setFonts(merged);
+      injectFontFaces(merged);
+      try {
+        localStorage.setItem(FONTS_KEY, JSON.stringify(merged));
+      } catch {/* ignore */}
+
       try {
         const { puck_data } = await getHomePuckData();
         if (isValidPuckData(puck_data)) {
