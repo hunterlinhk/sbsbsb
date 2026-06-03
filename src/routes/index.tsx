@@ -118,11 +118,7 @@ function parseSectionVisibility(v: unknown): Record<SectionId, boolean> {
 }
 
 function IndexPage() {
-  const { data } = useQuery({
-    queryKey: ["home-content"],
-    queryFn: () => getHomeContent(),
-    staleTime: 60_000,
-  });
+  const { data } = useSuspenseQuery(homeContentQueryOptions);
 
   const home = data?.home;
   const capabilities = data?.capabilities ?? [];
@@ -130,31 +126,26 @@ function IndexPage() {
   const puckData = (home as Record<string, unknown> | undefined)?.puck_data;
 
   // Load custom fonts saved in localStorage by the Puck editor (best-effort, browser-only).
-  const [fontsReady, setFontsReady] = useState(false);
-  useEffect(() => {
+  // Inject synchronously on first render so font CSS is in <head> before paint.
+  if (typeof document !== "undefined" && !document.getElementById("site-custom-fonts")) {
     try {
       const raw = localStorage.getItem("custom-fonts");
       if (raw) {
         const fonts = JSON.parse(raw);
         if (Array.isArray(fonts)) {
-          const styleId = "site-custom-fonts";
-          let el = document.getElementById(styleId) as HTMLStyleElement | null;
-          if (!el) {
-            el = document.createElement("style");
-            el.id = styleId;
-            document.head.appendChild(el);
-          }
+          const el = document.createElement("style");
+          el.id = "site-custom-fonts";
           el.textContent = fonts
             .filter((f) => f && typeof f.name === "string" && typeof f.url === "string")
             .map((f) => `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`)
             .join("\n");
+          document.head.appendChild(el);
         }
       }
     } catch {
       // ignore
     }
-    setFontsReady(true);
-  }, []);
+  }
 
   const sectionOrder = useMemo(
     () => parseSectionOrder((home as Record<string, unknown> | undefined)?.section_order),
@@ -164,6 +155,7 @@ function IndexPage() {
     () => parseSectionVisibility((home as Record<string, unknown> | undefined)?.section_visibility),
     [home],
   );
+
 
   // If a valid Puck data blob exists, render it instead of the legacy sections.
   if (isValidPuckData(puckData)) {
