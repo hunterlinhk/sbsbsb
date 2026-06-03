@@ -175,7 +175,7 @@ function IndexPage() {
     }
   }
 
-  void fontsReady;
+  
 
   const fs = ((home as Record<string, unknown> | undefined)?.field_styles ?? {}) as FieldStyles;
 
