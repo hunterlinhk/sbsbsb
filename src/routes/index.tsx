@@ -117,6 +117,66 @@ function parseSectionVisibility(v: unknown): Record<SectionId, boolean> {
   return visibility;
 }
 
+type CustomFont = { name: string; url: string };
+
+function parseCustomFonts(raw: unknown): CustomFont[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (f): f is CustomFont =>
+      !!f && typeof (f as CustomFont).name === "string" && typeof (f as CustomFont).url === "string",
+  );
+}
+
+function fontMimeFromUrl(url: string): string {
+  const u = url.toLowerCase().split("?")[0];
+  if (u.endsWith(".woff2")) return "font/woff2";
+  if (u.endsWith(".woff")) return "font/woff";
+  if (u.endsWith(".ttf")) return "font/ttf";
+  if (u.endsWith(".otf")) return "font/otf";
+  return "font/woff2";
+}
+
+// Title fonts get `block` (avoid swap flash on hero), body fonts get `swap`.
+const TITLE_FONT_HINTS = ["title", "heading", "biaoti", "标题", "display", "黑体"];
+function fontDisplayFor(name: string): "block" | "swap" {
+  const n = name.toLowerCase();
+  return TITLE_FONT_HINTS.some((h) => n.includes(h)) ? "block" : "swap";
+}
+
+function FontPreloader({ fonts }: { fonts: CustomFont[] }) {
+  if (fonts.length === 0) return null;
+  // Deduplicate by name
+  const seen = new Set<string>();
+  const unique = fonts.filter((f) => (seen.has(f.name) ? false : (seen.add(f.name), true)));
+  const css = unique
+    .map(
+      (f) =>
+        `@font-face{font-family:"${f.name.replace(/"/g, "")}";src:url("${f.url}");font-display:${fontDisplayFor(f.name)};}`,
+    )
+    .join("");
+  return (
+    <>
+      {unique.map((f) => (
+        <link
+          key={f.name}
+          rel="preload"
+          as="font"
+          href={f.url}
+          type={fontMimeFromUrl(f.url)}
+          crossOrigin="anonymous"
+        />
+      ))}
+      {/* React 19 hoists <style> with a precedence into <head> during SSR */}
+      <style
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore — React 19 style hoisting
+        precedence="custom-fonts"
+        dangerouslySetInnerHTML={{ __html: css }}
+      />
+    </>
+  );
+}
+
 function IndexPage() {
   const { data } = useSuspenseQuery(homeContentQueryOptions);
 
@@ -125,27 +185,10 @@ function IndexPage() {
   const brands = (home?.brands as string[] | undefined) ?? DEFAULT_BRANDS;
   const puckData = (home as Record<string, unknown> | undefined)?.puck_data;
 
-  // Load custom fonts saved in localStorage by the Puck editor (best-effort, browser-only).
-  // Inject synchronously on first render so font CSS is in <head> before paint.
-  if (typeof document !== "undefined" && !document.getElementById("site-custom-fonts")) {
-    try {
-      const raw = localStorage.getItem("custom-fonts");
-      if (raw) {
-        const fonts = JSON.parse(raw);
-        if (Array.isArray(fonts)) {
-          const el = document.createElement("style");
-          el.id = "site-custom-fonts";
-          el.textContent = fonts
-            .filter((f) => f && typeof f.name === "string" && typeof f.url === "string")
-            .map((f) => `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`)
-            .join("\n");
-          document.head.appendChild(el);
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }
+  const customFonts = useMemo(
+    () => parseCustomFonts((home as Record<string, unknown> | undefined)?.custom_fonts),
+    [home],
+  );
 
   const sectionOrder = useMemo(
     () => parseSectionOrder((home as Record<string, unknown> | undefined)?.section_order),
@@ -162,6 +205,7 @@ function IndexPage() {
     try {
       return (
         <div className="min-h-screen bg-background">
+          <FontPreloader fonts={customFonts} />
           <Header />
           <main>
             <Render config={puckConfig} data={puckData} />
@@ -174,6 +218,8 @@ function IndexPage() {
       // fall through to legacy render below
     }
   }
+
+  
 
   
 
