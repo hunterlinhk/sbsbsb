@@ -3,7 +3,7 @@ import { Puck, Render, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
 import { buildPuckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
 import { getAdminToken } from "@/lib/admin-auth";
-import { getHomePuckData, saveHomePuckData, uploadFont } from "@/lib/site.functions";
+import { getHomeContent, getHomePuckData, saveHomePuckData, updateCustomFonts, uploadFont } from "@/lib/site.functions";
 
 const LOCAL_KEY = "puck-home-editor-prototype";
 const FONTS_KEY = "custom-fonts";
