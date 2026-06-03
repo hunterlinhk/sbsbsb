@@ -1178,6 +1178,13 @@ export function LiveEditorPanel({ token }: { token: string }) {
         </div>
       )}
 
+      {!data?.home && (
+        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          未能获取首页内容，预览正在使用默认占位内容。
+        </div>
+      )}
+
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4 rounded-md border border-border bg-silver/10 p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">首页预览</div>
