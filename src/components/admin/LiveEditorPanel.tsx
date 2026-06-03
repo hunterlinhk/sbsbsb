@@ -534,37 +534,63 @@ export function LiveEditorPanel({ token }: { token: string }) {
     if (data?.home) setForm(data.home as Record<string, unknown>);
   }, [data]);
 
-  // Read custom fonts uploaded via the Puck editor (localStorage).
+  // Load custom fonts: prefer DB (home.custom_fonts), fall back to localStorage.
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("custom-fonts");
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) {
-          const fonts = arr.filter(
-            (f) => f && typeof f.name === "string" && typeof f.url === "string",
-          );
-          setCustomFonts(fonts);
-          // inject @font-face for preview
-          const styleId = "live-editor-custom-fonts";
-          let el = document.getElementById(styleId) as HTMLStyleElement | null;
-          if (!el) {
-            el = document.createElement("style");
-            el.id = styleId;
-            document.head.appendChild(el);
-          }
-          el.textContent = fonts
-            .map(
-              (f) =>
-                `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
-            )
-            .join("\n");
-        }
-      }
-    } catch {
-      // ignore
+    let fonts: { name: string; url: string }[] = [];
+    const dbFonts = (data?.home as { custom_fonts?: unknown } | undefined)?.custom_fonts;
+    if (Array.isArray(dbFonts)) {
+      fonts = (dbFonts as { name: string; url: string }[]).filter(
+        (f) => f && typeof f.name === "string" && typeof f.url === "string",
+      );
     }
-  }, []);
+    if (fonts.length === 0) {
+      try {
+        const raw = localStorage.getItem("custom-fonts");
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) {
+            fonts = arr.filter(
+              (f) => f && typeof f.name === "string" && typeof f.url === "string",
+            );
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    setCustomFonts(fonts);
+    // inject @font-face for preview
+    const styleId = "live-editor-custom-fonts";
+    let el = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement("style");
+      el.id = styleId;
+      document.head.appendChild(el);
+    }
+    el.textContent = fonts
+      .map(
+        (f) =>
+          `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
+      )
+      .join("\n");
+  }, [data]);
+
+  const deleteCustomFont = async (name: string) => {
+    if (!confirm(`确认删除字体 "${name}" 吗？已在内容中使用此字体的位置将回退为默认字体。`)) return;
+    const next = customFonts.filter((f) => f.name !== name);
+    setCustomFonts(next);
+    try {
+      localStorage.setItem("custom-fonts", JSON.stringify(next));
+    } catch {/* ignore */}
+    try {
+      await updateCustomFonts({ data: { password: token, fonts: next } });
+      toast.success("已删除字体");
+      qc.invalidateQueries({ queryKey: ["home-content"] });
+      qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
+    } catch (e) {
+      toast.error(`删除失败：${e instanceof Error ? e.message : "未知错误"}`);
+    }
+  };
 
   const order = useMemo(() => parseSectionOrder(form.section_order), [form.section_order]);
   const visibility = useMemo(
