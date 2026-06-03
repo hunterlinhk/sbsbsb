@@ -1,23 +1,26 @@
 import { type CSSProperties, type ElementType, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
   Bold,
   Cpu,
+  ExternalLink,
   Eye,
   EyeOff,
   Factory,
   Italic,
   ShieldCheck,
+  Trash2,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Field, SaveBar, TextArea, TextInput } from "@/components/admin/fields";
 import { ImageUpload } from "@/components/site/ImageUpload";
-import { getHomeContent, getSiteSettings, saveHomeLiveEditor } from "@/lib/site.functions";
+import { getHomeContent, getSiteSettings, saveHomeLiveEditor, updateCustomFonts } from "@/lib/site.functions";
 import defaultLogo from "@/assets/logo.png";
 import heroFactory from "@/assets/hero-factory.jpg";
 import workshopImg from "@/assets/workshop.jpg";
