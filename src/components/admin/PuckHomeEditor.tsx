@@ -204,6 +204,11 @@ export function PuckHomeEditor() {
       setFonts(next);
       localStorage.setItem(FONTS_KEY, JSON.stringify(next));
       injectFontFaces(next);
+      try {
+        await updateCustomFonts({ data: { password: token, fonts: next } });
+      } catch (e) {
+        console.warn("保存字体到数据库失败", e);
+      }
       setNewFontName("");
       showToast("ok", "字体已上传");
     } catch (e) {
@@ -213,11 +218,19 @@ export function PuckHomeEditor() {
     }
   }, [fonts, newFontName, showToast]);
 
-  const handleRemoveFont = useCallback((name: string) => {
+  const handleRemoveFont = useCallback(async (name: string) => {
     const next = fonts.filter((f) => f.name !== name);
     setFonts(next);
     localStorage.setItem(FONTS_KEY, JSON.stringify(next));
     injectFontFaces(next);
+    const token = getAdminToken();
+    if (token) {
+      try {
+        await updateCustomFonts({ data: { password: token, fonts: next } });
+      } catch (e) {
+        console.warn("保存字体到数据库失败", e);
+      }
+    }
   }, [fonts]);
 
   const fontListText = useMemo(
