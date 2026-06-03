@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Cpu, Factory, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Render } from "@measured/puck";
 import { Counter } from "@/components/site/Counter";
 import { Footer } from "@/components/site/Footer";
@@ -16,6 +16,26 @@ import motorImg from "@/assets/product-motor.jpg";
 import { getHomeContent } from "@/lib/site.functions";
 import { puckConfig, isValidPuckData } from "@/lib/puck-config";
 
+const homeContentQueryOptions = queryOptions({
+  queryKey: ["home-content"],
+  queryFn: () => getHomeContent(),
+  staleTime: 60_000,
+});
+
+function HomeLoadingShell() {
+  return (
+    <div className="min-h-screen bg-navy-deep">
+      <div className="h-16 w-full border-b border-white/5" />
+      <div className="mx-auto max-w-7xl px-6 pt-24 lg:px-10">
+        <div className="h-3 w-32 animate-pulse rounded bg-white/10" />
+        <div className="mt-6 h-12 w-3/4 animate-pulse rounded bg-white/10" />
+        <div className="mt-4 h-12 w-2/3 animate-pulse rounded bg-white/10" />
+        <div className="mt-8 h-4 w-1/2 animate-pulse rounded bg-white/5" />
+        <div className="mt-2 h-4 w-2/5 animate-pulse rounded bg-white/5" />
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +45,16 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: heroFactory },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(homeContentQueryOptions),
+  pendingComponent: HomeLoadingShell,
+  errorComponent: ({ error }) => (
+    <div className="flex min-h-screen items-center justify-center bg-navy-deep text-white">
+      <div className="text-center">
+        <p className="text-sm text-silver/70">页面加载失败</p>
+        <p className="mt-2 text-xs text-silver/50">{error.message}</p>
+      </div>
+    </div>
+  ),
   component: IndexPage,
 });
 
