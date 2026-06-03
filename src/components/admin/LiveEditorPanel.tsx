@@ -1131,14 +1131,53 @@ export function LiveEditorPanel({ token }: { token: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
-        可视化编辑器已加载
+      <div className="flex flex-wrap items-center justify-between gap-3 border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
+        <span>可视化编辑器已加载</span>
+        <Link
+          to="/"
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-1.5 border border-navy-deep/30 bg-white px-3 py-1.5 text-xs font-medium text-navy-deep hover:bg-navy-deep hover:text-white"
+        >
+          返回首页 <ExternalLink size={12} />
+        </Link>
       </div>
-      {!data?.home && (
-        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          未能获取首页内容，预览正在使用默认占位内容。
+
+      {customFonts.length > 0 && (
+        <div className="border border-border bg-white p-4">
+          <div className="text-sm font-semibold text-navy-deep">已上传的自定义字体</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            删除后，使用该字体的位置会自动回退为默认字体。新字体请在“拖拽编辑器”页面上传。
+          </p>
+          <ul className="mt-3 space-y-2">
+            {customFonts.map((f) => (
+              <li
+                key={f.name}
+                className="flex items-center justify-between border border-border bg-silver/20 px-3 py-2 text-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <span className="font-mono text-xs text-muted-foreground">{f.name}</span>
+                  <span
+                    className="ml-3 text-base"
+                    style={{ fontFamily: `"${f.name}"` }}
+                  >
+                    示例：景鸿科技 The quick brown fox 1234
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => deleteCustomFont(f.name)}
+                  className="inline-flex items-center gap-1 border border-red-200 bg-white px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                  title="删除字体"
+                >
+                  <Trash2 size={12} /> 删除
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4 rounded-md border border-border bg-silver/10 p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">首页预览</div>
