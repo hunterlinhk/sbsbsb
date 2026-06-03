@@ -203,6 +203,7 @@ export type Database = {
           cta_desc: string | null
           cta_eyebrow: string | null
           cta_title: string | null
+          custom_fonts: Json
           field_styles: Json
           hero_eyebrow: string | null
           hero_image: string | null
@@ -256,6 +257,7 @@ export type Database = {
           cta_desc?: string | null
           cta_eyebrow?: string | null
           cta_title?: string | null
+          custom_fonts?: Json
           field_styles?: Json
           hero_eyebrow?: string | null
           hero_image?: string | null
@@ -309,6 +311,7 @@ export type Database = {
           cta_desc?: string | null
           cta_eyebrow?: string | null
           cta_title?: string | null
+          custom_fonts?: Json
           field_styles?: Json
           hero_eyebrow?: string | null
           hero_image?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.home_content ADD COLUMN IF NOT EXISTS custom_fonts jsonb NOT NULL DEFAULT '[]'::jsonb;
