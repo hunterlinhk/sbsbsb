@@ -535,29 +535,30 @@ export function LiveEditorPanel({ token }: { token: string }) {
   }, [data]);
 
   // Load custom fonts: prefer DB (home.custom_fonts), fall back to localStorage.
+  // If DB is empty but localStorage has fonts (uploaded before DB column existed),
+  // auto-sync them up so the public homepage SSR can preload + inject @font-face.
   useEffect(() => {
-    let fonts: { name: string; url: string }[] = [];
     const dbFonts = (data?.home as { custom_fonts?: unknown } | undefined)?.custom_fonts;
-    if (Array.isArray(dbFonts)) {
-      fonts = (dbFonts as { name: string; url: string }[]).filter(
-        (f) => f && typeof f.name === "string" && typeof f.url === "string",
-      );
-    }
-    if (fonts.length === 0) {
-      try {
-        const raw = localStorage.getItem("custom-fonts");
-        if (raw) {
-          const arr = JSON.parse(raw);
-          if (Array.isArray(arr)) {
-            fonts = arr.filter(
-              (f) => f && typeof f.name === "string" && typeof f.url === "string",
-            );
-          }
+    const dbList: { name: string; url: string }[] = Array.isArray(dbFonts)
+      ? (dbFonts as { name: string; url: string }[]).filter(
+          (f) => f && typeof f.name === "string" && typeof f.url === "string",
+        )
+      : [];
+    let localFonts: { name: string; url: string }[] = [];
+    try {
+      const raw = localStorage.getItem("custom-fonts");
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          localFonts = arr.filter(
+            (f) => f && typeof f.name === "string" && typeof f.url === "string",
+          );
         }
-      } catch {
-        // ignore
       }
+    } catch {
+      // ignore
     }
+    const fonts = dbList.length > 0 ? dbList : localFonts;
     setCustomFonts(fonts);
     // inject @font-face for preview
     const styleId = "live-editor-custom-fonts";
@@ -573,7 +574,21 @@ export function LiveEditorPanel({ token }: { token: string }) {
           `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
       )
       .join("\n");
-  }, [data]);
+
+    // One-time auto-sync: localStorage has fonts but DB does not → push to DB so
+    // the public homepage can actually load them. Fixes "后台设置了字体却看不见".
+    if (dbList.length === 0 && localFonts.length > 0 && token) {
+      updateCustomFonts({ data: { password: token, fonts: localFonts } })
+        .then(() => {
+          qc.invalidateQueries({ queryKey: ["home-content"] });
+          qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
+          toast.success("已将本地字体同步到线上，刷新首页即可看到效果");
+        })
+        .catch((e) => {
+          console.warn("自动同步字体到数据库失败", e);
+        });
+    }
+  }, [data, token, qc]);
 
   const deleteCustomFont = async (name: string) => {
     if (!confirm(`确认删除字体 "${name}" 吗？已在内容中使用此字体的位置将回退为默认字体。`)) return;
