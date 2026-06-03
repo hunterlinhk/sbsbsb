@@ -166,11 +166,9 @@ function FontPreloader({ fonts }: { fonts: CustomFont[] }) {
           crossOrigin="anonymous"
         />
       ))}
-      {/* React 19 hoists <style> with a precedence into <head> during SSR */}
+      {/* React 19 hoists <style> with a `precedence` prop into <head> during SSR */}
       <style
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore — React 19 style hoisting
-        precedence="custom-fonts"
+        {...({ precedence: "custom-fonts" } as Record<string, string>)}
         dangerouslySetInnerHTML={{ __html: css }}
       />
     </>
