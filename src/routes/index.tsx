@@ -236,6 +236,7 @@ function IndexPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <FontPreloader fonts={customFonts} />
       <Header />
       <main>
         {sectionOrder.map((id) =>
