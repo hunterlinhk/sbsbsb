@@ -3,7 +3,7 @@ import { Puck, Render, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
 import { buildPuckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
 import { getAdminToken } from "@/lib/admin-auth";
-import { getHomePuckData, saveHomePuckData, uploadFont } from "@/lib/site.functions";
+import { getHomeContent, getHomePuckData, saveHomePuckData, updateCustomFonts, uploadFont } from "@/lib/site.functions";
 
 const LOCAL_KEY = "puck-home-editor-prototype";
 const FONTS_KEY = "custom-fonts";
@@ -61,10 +61,27 @@ export function PuckHomeEditor() {
 
   // Load fonts & data on mount
   useEffect(() => {
-    const f = loadFontsFromStorage();
-    setFonts(f);
-    injectFontFaces(f);
     (async () => {
+      // Prefer fonts from DB (server-side preloadable), fall back to localStorage
+      let dbFonts: CustomFont[] = [];
+      try {
+        const { home } = await getHomeContent();
+        const raw = (home as { custom_fonts?: unknown } | null)?.custom_fonts;
+        if (Array.isArray(raw)) {
+          dbFonts = (raw as CustomFont[]).filter(
+            (f) => f && typeof f.name === "string" && typeof f.url === "string",
+          );
+        }
+      } catch {
+        // ignore
+      }
+      const merged = dbFonts.length > 0 ? dbFonts : loadFontsFromStorage();
+      setFonts(merged);
+      injectFontFaces(merged);
+      try {
+        localStorage.setItem(FONTS_KEY, JSON.stringify(merged));
+      } catch {/* ignore */}
+
       try {
         const { puck_data } = await getHomePuckData();
         if (isValidPuckData(puck_data)) {
@@ -187,6 +204,11 @@ export function PuckHomeEditor() {
       setFonts(next);
       localStorage.setItem(FONTS_KEY, JSON.stringify(next));
       injectFontFaces(next);
+      try {
+        await updateCustomFonts({ data: { password: token, fonts: next } });
+      } catch (e) {
+        console.warn("保存字体到数据库失败", e);
+      }
       setNewFontName("");
       showToast("ok", "字体已上传");
     } catch (e) {
@@ -196,11 +218,19 @@ export function PuckHomeEditor() {
     }
   }, [fonts, newFontName, showToast]);
 
-  const handleRemoveFont = useCallback((name: string) => {
+  const handleRemoveFont = useCallback(async (name: string) => {
     const next = fonts.filter((f) => f.name !== name);
     setFonts(next);
     localStorage.setItem(FONTS_KEY, JSON.stringify(next));
     injectFontFaces(next);
+    const token = getAdminToken();
+    if (token) {
+      try {
+        await updateCustomFonts({ data: { password: token, fonts: next } });
+      } catch (e) {
+        console.warn("保存字体到数据库失败", e);
+      }
+    }
   }, [fonts]);
 
   const fontListText = useMemo(

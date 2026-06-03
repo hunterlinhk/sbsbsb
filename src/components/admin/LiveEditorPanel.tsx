@@ -1,23 +1,26 @@
 import { type CSSProperties, type ElementType, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
   Bold,
   Cpu,
+  ExternalLink,
   Eye,
   EyeOff,
   Factory,
   Italic,
   ShieldCheck,
+  Trash2,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Field, SaveBar, TextArea, TextInput } from "@/components/admin/fields";
 import { ImageUpload } from "@/components/site/ImageUpload";
-import { getHomeContent, getSiteSettings, saveHomeLiveEditor } from "@/lib/site.functions";
+import { getHomeContent, getSiteSettings, saveHomeLiveEditor, updateCustomFonts } from "@/lib/site.functions";
 import defaultLogo from "@/assets/logo.png";
 import heroFactory from "@/assets/hero-factory.jpg";
 import workshopImg from "@/assets/workshop.jpg";
@@ -531,37 +534,63 @@ export function LiveEditorPanel({ token }: { token: string }) {
     if (data?.home) setForm(data.home as Record<string, unknown>);
   }, [data]);
 
-  // Read custom fonts uploaded via the Puck editor (localStorage).
+  // Load custom fonts: prefer DB (home.custom_fonts), fall back to localStorage.
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("custom-fonts");
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) {
-          const fonts = arr.filter(
-            (f) => f && typeof f.name === "string" && typeof f.url === "string",
-          );
-          setCustomFonts(fonts);
-          // inject @font-face for preview
-          const styleId = "live-editor-custom-fonts";
-          let el = document.getElementById(styleId) as HTMLStyleElement | null;
-          if (!el) {
-            el = document.createElement("style");
-            el.id = styleId;
-            document.head.appendChild(el);
-          }
-          el.textContent = fonts
-            .map(
-              (f) =>
-                `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
-            )
-            .join("\n");
-        }
-      }
-    } catch {
-      // ignore
+    let fonts: { name: string; url: string }[] = [];
+    const dbFonts = (data?.home as { custom_fonts?: unknown } | undefined)?.custom_fonts;
+    if (Array.isArray(dbFonts)) {
+      fonts = (dbFonts as { name: string; url: string }[]).filter(
+        (f) => f && typeof f.name === "string" && typeof f.url === "string",
+      );
     }
-  }, []);
+    if (fonts.length === 0) {
+      try {
+        const raw = localStorage.getItem("custom-fonts");
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) {
+            fonts = arr.filter(
+              (f) => f && typeof f.name === "string" && typeof f.url === "string",
+            );
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    setCustomFonts(fonts);
+    // inject @font-face for preview
+    const styleId = "live-editor-custom-fonts";
+    let el = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement("style");
+      el.id = styleId;
+      document.head.appendChild(el);
+    }
+    el.textContent = fonts
+      .map(
+        (f) =>
+          `@font-face { font-family: "${String(f.name).replace(/"/g, "")}"; src: url("${f.url}"); font-display: swap; }`,
+      )
+      .join("\n");
+  }, [data]);
+
+  const deleteCustomFont = async (name: string) => {
+    if (!confirm(`确认删除字体 "${name}" 吗？已在内容中使用此字体的位置将回退为默认字体。`)) return;
+    const next = customFonts.filter((f) => f.name !== name);
+    setCustomFonts(next);
+    try {
+      localStorage.setItem("custom-fonts", JSON.stringify(next));
+    } catch {/* ignore */}
+    try {
+      await updateCustomFonts({ data: { password: token, fonts: next } });
+      toast.success("已删除字体");
+      qc.invalidateQueries({ queryKey: ["home-content"] });
+      qc.invalidateQueries({ queryKey: ["admin-live-editor-home"] });
+    } catch (e) {
+      toast.error(`删除失败：${e instanceof Error ? e.message : "未知错误"}`);
+    }
+  };
 
   const order = useMemo(() => parseSectionOrder(form.section_order), [form.section_order]);
   const visibility = useMemo(
@@ -1102,14 +1131,60 @@ export function LiveEditorPanel({ token }: { token: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
-        可视化编辑器已加载
+      <div className="flex flex-wrap items-center justify-between gap-3 border border-mid-blue bg-mid-blue/10 px-4 py-3 text-sm font-semibold text-navy-deep">
+        <span>可视化编辑器已加载</span>
+        <Link
+          to="/"
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-1.5 border border-navy-deep/30 bg-white px-3 py-1.5 text-xs font-medium text-navy-deep hover:bg-navy-deep hover:text-white"
+        >
+          返回首页 <ExternalLink size={12} />
+        </Link>
       </div>
+
+      {customFonts.length > 0 && (
+        <div className="border border-border bg-white p-4">
+          <div className="text-sm font-semibold text-navy-deep">已上传的自定义字体</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            删除后，使用该字体的位置会自动回退为默认字体。新字体请在“拖拽编辑器”页面上传。
+          </p>
+          <ul className="mt-3 space-y-2">
+            {customFonts.map((f) => (
+              <li
+                key={f.name}
+                className="flex items-center justify-between border border-border bg-silver/20 px-3 py-2 text-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <span className="font-mono text-xs text-muted-foreground">{f.name}</span>
+                  <span
+                    className="ml-3 text-base"
+                    style={{ fontFamily: `"${f.name}"` }}
+                  >
+                    示例：景鸿科技 The quick brown fox 1234
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => deleteCustomFont(f.name)}
+                  className="inline-flex items-center gap-1 border border-red-200 bg-white px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                  title="删除字体"
+                >
+                  <Trash2 size={12} /> 删除
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {!data?.home && (
         <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           未能获取首页内容，预览正在使用默认占位内容。
         </div>
       )}
+
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4 rounded-md border border-border bg-silver/10 p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">首页预览</div>
