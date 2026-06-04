@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogoAsset from "@/assets/jinghong-logo.png.asset.json";
 import { getSiteSettings } from "@/lib/site.functions";
+const defaultLogo = defaultLogoAsset.url;
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
