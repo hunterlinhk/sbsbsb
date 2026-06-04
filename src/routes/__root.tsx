@@ -109,6 +109,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(siteSettingsQueryOptions).catch(() => null),
 });
 
 function RootShell({ children }: { children: ReactNode }) {
