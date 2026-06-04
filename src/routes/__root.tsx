@@ -12,6 +12,13 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { getSiteSettings } from "@/lib/site.functions";
+
+const siteSettingsQueryOptions = {
+  queryKey: ["site-settings"],
+  queryFn: () => getSiteSettings(),
+  staleTime: 60_000,
+};
 
 function NotFoundComponent() {
   return (
