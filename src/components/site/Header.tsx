@@ -43,7 +43,7 @@ export function Header() {
           <img
             src={logoUrl}
             alt={s?.company_name || "Logo"}
-            className="h-14 w-auto max-w-[14rem] object-contain lg:h-16 lg:max-w-[18rem]"
+            className="h-20 w-auto max-w-[20rem] object-contain lg:h-24 lg:max-w-[26rem]"
           />
         </Link>
 
