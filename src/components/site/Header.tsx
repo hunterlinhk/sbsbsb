@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
-import defaultLogoAsset from "@/assets/jinghong-logo.png.asset.json";
+import defaultLogoAsset from "@/assets/jinghong-logo-v2.png.asset.json";
 import { getSiteSettings } from "@/lib/site.functions";
 const defaultLogo = defaultLogoAsset.url;
 
