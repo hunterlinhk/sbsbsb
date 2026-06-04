@@ -1,0 +1,1 @@
+UPDATE public.site_settings SET logo_url = '/__l5e/assets-v1/bdd03340-27fe-4991-8c7c-54c0eb80daec/jinghong-logo-v3.png';
