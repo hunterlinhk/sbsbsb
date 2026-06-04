@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogoAsset from "@/assets/jinghong-logo.png.asset.json";
 import { getSiteSettings } from "@/lib/site.functions";
+const defaultLogo = defaultLogoAsset.url;
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +43,7 @@ export function Header() {
           <img
             src={logoUrl}
             alt={s?.company_name || "Logo"}
-            className="h-10 w-auto max-w-[10rem] object-contain lg:h-12 lg:max-w-[12rem]"
+            className="h-14 w-auto max-w-[14rem] object-contain lg:h-16 lg:max-w-[18rem]"
           />
         </Link>
 
