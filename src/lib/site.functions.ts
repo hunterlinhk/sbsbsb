@@ -1,14 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireAdminSession } from "@/lib/admin-session.server";
 
-const ADMIN_PASSWORD = "Jhkj888";
+// All admin-only server functions enforce auth via `requireAdminSession()`,
+// which validates the encrypted HttpOnly session cookie set by
+// POST /api/admin/login. Legacy schemas still accept an optional `password`
+// field for backwards-compatibility with older clients, but the value is
+// IGNORED — auth is decided entirely server-side from the cookie.
+const pw = z.object({ password: z.string().optional() });
 
-function requireAdmin(password: string) {
-  if (password !== ADMIN_PASSWORD) throw new Error("未授权，密码错误");
-}
-
-const pw = z.object({ password: z.string() });
 
 // ====================== Public (read) ======================
 
@@ -106,15 +107,19 @@ export const getNewsById = createServerFn({ method: "GET" })
 
 // ====================== Admin ======================
 
+
+// Legacy server fn kept as a thin shim for any caller that still imports it.
+// Real login now happens via POST /api/admin/login which sets an HttpOnly
+// session cookie. This shim always throws so it cannot be misused.
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ username: z.string(), password: z.string() }).parse(input),
   )
-  .handler(async ({ data }) => {
-    if (data.username !== "Jhkj888" || data.password !== ADMIN_PASSWORD)
-      throw new Error("用户名或密码错误");
-    return { ok: true, token: ADMIN_PASSWORD };
+  .handler(async () => {
+    throw new Error("此接口已废弃，请使用 /api/admin/login");
   });
+
+
 
 // ----- generic single-row upsert helpers -----
 
@@ -123,7 +128,7 @@ export const updateSiteSettings = createServerFn({ method: "POST" })
     pw.extend({ values: z.record(z.string(), z.any()) }).parse(input),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("site_settings").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
@@ -135,7 +140,7 @@ export const updateHomeContent = createServerFn({ method: "POST" })
     pw.extend({ values: z.record(z.string(), z.any()) }).parse(input),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("home_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
@@ -185,7 +190,7 @@ export const saveHomeLiveEditor = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("home_content")
       .update(data.values as never)
@@ -199,7 +204,7 @@ export const updateAboutContent = createServerFn({ method: "POST" })
     pw.extend({ values: z.record(z.string(), z.any()) }).parse(input),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("about_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
@@ -211,7 +216,7 @@ export const updateContactContent = createServerFn({ method: "POST" })
     pw.extend({ values: z.record(z.string(), z.any()) }).parse(input),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("contact_content").update(data.values as never).eq("id", 1);
     if (error) throw new Error(error.message);
@@ -223,7 +228,7 @@ export const updateContactContent = createServerFn({ method: "POST" })
 export const adminListCapabilities = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { data: rows, error } = await supabaseAdmin
       .from("home_capabilities").select("*").order("sort_order");
     if (error) throw new Error(error.message);
@@ -238,7 +243,7 @@ export const upsertCapability = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     if (data.id) {
       const { error } = await supabaseAdmin
         .from("home_capabilities").update(data.values as never).eq("id", data.id);
@@ -254,7 +259,7 @@ export const upsertCapability = createServerFn({ method: "POST" })
 export const deleteCapability = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.extend({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("home_capabilities").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -266,7 +271,7 @@ export const deleteCapability = createServerFn({ method: "POST" })
 export const adminListProducts = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { data: rows, error } = await supabaseAdmin
       .from("products").select("*").order("sort_order");
     if (error) throw new Error(error.message);
@@ -281,7 +286,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     if (data.id) {
       const { error } = await supabaseAdmin
         .from("products").update(data.values as never).eq("id", data.id);
@@ -297,7 +302,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
 export const deleteProduct = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.extend({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -309,7 +314,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
 export const adminListSteps = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { data: rows, error } = await supabaseAdmin
       .from("process_steps").select("*").order("sort_order");
     if (error) throw new Error(error.message);
@@ -324,7 +329,7 @@ export const upsertStep = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     if (data.id) {
       const { error } = await supabaseAdmin
         .from("process_steps").update(data.values as never).eq("id", data.id);
@@ -340,7 +345,7 @@ export const upsertStep = createServerFn({ method: "POST" })
 export const deleteStep = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.extend({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("process_steps").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -352,7 +357,7 @@ export const deleteStep = createServerFn({ method: "POST" })
 export const adminListAllNews = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { data: rows, error } = await supabaseAdmin
       .from("news").select("*").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -367,7 +372,7 @@ export const upsertNews = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     if (data.id) {
       const { error } = await supabaseAdmin
         .from("news").update(data.values as never).eq("id", data.id);
@@ -392,7 +397,7 @@ export const adminCreateNews = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin.from("news").insert({
       title: data.title,
       summary: data.summary || null,
@@ -407,7 +412,7 @@ export const adminCreateNews = createServerFn({ method: "POST" })
 export const adminDeleteNews = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.extend({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin.from("news").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -418,7 +423,7 @@ export const adminDeleteNews = createServerFn({ method: "POST" })
 export const adminListInquiries = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { data: rows, error } = await supabaseAdmin
       .from("inquiries").select("*").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -430,7 +435,7 @@ export const adminToggleInquiry = createServerFn({ method: "POST" })
     pw.extend({ id: z.string().uuid(), handled: z.boolean() }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("inquiries")
       .update({ handled: data.handled, status: data.handled ? "done" : "pending" })
@@ -448,7 +453,7 @@ export const updateInquiry = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const upd: Record<string, unknown> = {};
     if (data.status) {
       upd.status = data.status;
@@ -463,7 +468,7 @@ export const updateInquiry = createServerFn({ method: "POST" })
 export const adminDeleteInquiry = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => pw.extend({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin.from("inquiries").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -480,7 +485,7 @@ export const uploadImage = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`;
     const buf = Buffer.from(data.base64, "base64");
@@ -513,7 +518,7 @@ export const saveHomePuckData = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("home_content")
       .update({ puck_data: data.puck_data } as never)
@@ -534,7 +539,7 @@ export const updateCustomFonts = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     const { error } = await supabaseAdmin
       .from("home_content")
       .update({ custom_fonts: data.fonts } as never)
@@ -556,7 +561,7 @@ export const uploadFont = createServerFn({ method: "POST" })
     }).parse(i),
   )
   .handler(async ({ data }) => {
-    requireAdmin(data.password);
+    await requireAdminSession();
     if (!ALLOWED_FONT_EXT.test(data.filename)) {
       throw new Error("仅支持 .woff2 / .woff / .ttf / .otf 字体文件");
     }

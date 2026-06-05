@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getAdminToken } from "@/lib/admin-auth";
+import { adminCheckSession } from "@/lib/admin-auth";
 import { SiteSettingsPanel, AboutPanel, ContactPanel } from "@/components/admin/SettingsPanel";
 import { HomePanel } from "@/components/admin/HomePanel";
 import { ProductsPanel, ProcessPanel } from "@/components/admin/ProductsPanel";
@@ -19,16 +19,22 @@ export const Route = createFileRoute("/admin/")({
 function AdminPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const [token, setToken] = useState<string | null>(null);
+  const [authed, setAuthed] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<AdminTabId>("settings");
 
   useEffect(() => {
-    const t = getAdminToken();
-    if (!t) {
-      navigate({ to: "/login" });
-      return;
-    }
-    setToken(t);
+    let cancelled = false;
+    adminCheckSession().then((ok) => {
+      if (cancelled) return;
+      if (!ok) {
+        navigate({ to: "/login" });
+        return;
+      }
+      setAuthed(true);
+      setChecking(false);
+    });
+    return () => { cancelled = true; };
   }, [navigate]);
 
   useEffect(() => {
@@ -37,13 +43,17 @@ function AdminPage() {
     if (matched) setTab(matched.id);
   }, [search.tab]);
 
-  if (!token) return null;
+  if (checking || !authed) return null;
 
   const current = ADMIN_TABS.find((t) => t.id === tab)!;
   const onSelectTab = (next: AdminTabId) => {
     setTab(next);
     navigate({ to: "/admin", search: { tab: next } });
   };
+
+  // Server fns no longer require a real token; the empty string is a
+  // placeholder so legacy panel props keep their type signature.
+  const token = "";
 
   return (
     <AdminShell title={current.label} activeTab={tab} onSelectTab={onSelectTab}>

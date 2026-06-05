@@ -147,7 +147,6 @@ export function PuckHomeEditor() {
     setBusy(true);
     try {
       const token = getAdminToken();
-      if (!token) throw new Error("未登录");
       await saveHomePuckData({ data: { password: token, puck_data: currentData } });
       try {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(currentData));
@@ -166,7 +165,6 @@ export function PuckHomeEditor() {
     setBusy(true);
     try {
       const token = getAdminToken();
-      if (!token) throw new Error("未登录");
       await saveHomePuckData({ data: { password: token, puck_data: null } });
       showToast("ok", "已恢复为旧版渲染");
     } catch (e) {
@@ -190,10 +188,6 @@ export function PuckHomeEditor() {
       return;
     }
     const token = getAdminToken();
-    if (!token) {
-      showToast("err", "未登录");
-      return;
-    }
     setBusy(true);
     try {
       const { base64, contentType } = await fileToBase64(file);

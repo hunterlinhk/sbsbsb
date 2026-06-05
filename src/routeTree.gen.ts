@@ -17,6 +17,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
+import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
+import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
+import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as AdminPuckHomeRouteImport } from './routes/admin/puck/home'
 import { Route as AdminLiveEditorHomeRouteImport } from './routes/admin/live-editor/home'
 
@@ -60,6 +63,21 @@ const NewsIdRoute = NewsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => NewsRoute,
 } as any)
+const ApiAdminMeRoute = ApiAdminMeRouteImport.update({
+  id: '/api/admin/me',
+  path: '/api/admin/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
+  id: '/api/admin/logout',
+  path: '/api/admin/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
+  id: '/api/admin/login',
+  path: '/api/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPuckHomeRoute = AdminPuckHomeRouteImport.update({
   id: '/admin/puck/home',
   path: '/admin/puck/home',
@@ -82,6 +100,9 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +115,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +131,9 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +148,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +163,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
   id:
     | '__root__'
     | '/'
@@ -145,6 +178,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/me'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -157,6 +193,9 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
   AdminPuckHomeRoute: typeof AdminPuckHomeRoute
+  ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
+  ApiAdminMeRoute: typeof ApiAdminMeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -217,6 +256,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIdRouteImport
       parentRoute: typeof NewsRoute
     }
+    '/api/admin/me': {
+      id: '/api/admin/me'
+      path: '/api/admin/me'
+      fullPath: '/api/admin/me'
+      preLoaderRoute: typeof ApiAdminMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/logout': {
+      id: '/api/admin/logout'
+      path: '/api/admin/logout'
+      fullPath: '/api/admin/logout'
+      preLoaderRoute: typeof ApiAdminLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/login': {
+      id: '/api/admin/login'
+      path: '/api/admin/login'
+      fullPath: '/api/admin/login'
+      preLoaderRoute: typeof ApiAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/puck/home': {
       id: '/admin/puck/home'
       path: '/admin/puck/home'
@@ -254,17 +314,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
   AdminPuckHomeRoute: AdminPuckHomeRoute,
+  ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminLogoutRoute: ApiAdminLogoutRoute,
+  ApiAdminMeRoute: ApiAdminMeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
