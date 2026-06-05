@@ -1,14 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireAdminSession } from "@/lib/admin-session.server";
 
-const ADMIN_PASSWORD = "Jhkj888";
+// All admin-only server functions enforce auth via `requireAdminSession()`,
+// which validates the encrypted HttpOnly session cookie set by
+// POST /api/admin/login. Legacy schemas still accept an optional `password`
+// field for backwards-compatibility with older clients, but the value is
+// IGNORED — auth is decided entirely server-side from the cookie.
+const pw = z.object({ password: z.string().optional() });
 
-function requireAdmin(password: string) {
-  if (password !== ADMIN_PASSWORD) throw new Error("未授权，密码错误");
-}
-
-const pw = z.object({ password: z.string() });
 
 // ====================== Public (read) ======================
 
