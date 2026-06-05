@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { LiveEditorPanel } from "@/components/admin/LiveEditorPanel";
-import { getAdminToken } from "@/lib/admin-auth";
+import { adminCheckSession } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin/live-editor/home")({
   head: () => ({ meta: [{ title: "首页可视化编辑" }] }),
@@ -11,18 +11,19 @@ export const Route = createFileRoute("/admin/live-editor/home")({
 
 function HomeLiveEditorPage() {
   const navigate = useNavigate();
-  const [token, setToken] = useState<string | null>(null);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    const t = getAdminToken();
-    if (!t) {
-      navigate({ to: "/login" });
-      return;
-    }
-    setToken(t);
+    let cancelled = false;
+    adminCheckSession().then((ok) => {
+      if (cancelled) return;
+      if (!ok) navigate({ to: "/login" });
+      else setAuthed(true);
+    });
+    return () => { cancelled = true; };
   }, [navigate]);
 
-  if (!token) return null;
+  if (!authed) return null;
 
   return (
     <AdminShell
@@ -30,7 +31,7 @@ function HomeLiveEditorPage() {
       liveEditorActive
       onSelectTab={(tab) => navigate({ to: "/admin", search: { tab } })}
     >
-      <LiveEditorPanel token={token} />
+      <LiveEditorPanel token="" />
     </AdminShell>
   );
 }

@@ -12,7 +12,7 @@ import {
   Settings,
   Workflow,
 } from "lucide-react";
-import { clearAdminToken } from "@/lib/admin-auth";
+import { adminLogoutRequest } from "@/lib/admin-auth";
 
 export type AdminTabId =
   | "settings"
@@ -55,10 +55,11 @@ export function AdminShell({
 
   const navigate = useNavigate();
 
-  const logout = () => {
-    clearAdminToken();
+  const logout = async () => {
+    await adminLogoutRequest();
     navigate({ to: "/login" });
   };
+
 
   return (
     <div className="min-h-screen bg-silver/20">

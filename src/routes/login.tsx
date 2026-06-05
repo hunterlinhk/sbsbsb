@@ -4,8 +4,7 @@ import { Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { adminLogin } from "@/lib/site.functions";
-import { setAdminToken } from "@/lib/admin-auth";
+import { adminLoginRequest } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -18,14 +17,14 @@ function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await adminLogin({ data: { username, password } });
-      setAdminToken(res.token);
+      await adminLoginRequest({ username, password, remember });
       toast.success("登录成功");
       navigate({ to: "/admin" });
     } catch (err) {
@@ -50,7 +49,7 @@ function LoginPage() {
             管理员登录
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            登录后可管理询盘并发布企业新闻。
+            登录状态由服务端通过 HttpOnly Cookie 管理，前端 JS 无法读取凭证。
           </p>
 
           <label className="mt-8 block">
@@ -61,6 +60,7 @@ function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              autoComplete="username"
               className="mt-2 w-full border border-border bg-white px-4 py-3 text-sm text-navy-deep outline-none focus:border-mid-blue"
             />
           </label>
@@ -74,8 +74,19 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="mt-2 w-full border border-border bg-white px-4 py-3 text-sm text-navy-deep outline-none focus:border-mid-blue"
             />
+          </label>
+
+          <label className="mt-6 flex items-center gap-2 text-sm text-navy-deep">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4 border-border"
+            />
+            <span>记住我（14 天免登录）</span>
           </label>
 
           <button
