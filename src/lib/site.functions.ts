@@ -107,15 +107,19 @@ export const getNewsById = createServerFn({ method: "GET" })
 
 // ====================== Admin ======================
 
+
+// Legacy server fn kept as a thin shim for any caller that still imports it.
+// Real login now happens via POST /api/admin/login which sets an HttpOnly
+// session cookie. This shim always throws so it cannot be misused.
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ username: z.string(), password: z.string() }).parse(input),
   )
-  .handler(async ({ data }) => {
-    if (data.username !== "Jhkj888" || data.password !== ADMIN_PASSWORD)
-      throw new Error("用户名或密码错误");
-    return { ok: true, token: ADMIN_PASSWORD };
+  .handler(async () => {
+    throw new Error("此接口已废弃，请使用 /api/admin/login");
   });
+
+
 
 // ----- generic single-row upsert helpers -----
 
