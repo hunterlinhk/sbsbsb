@@ -47,7 +47,7 @@ export function Header() {
         scrolled ? "border-b border-white/10 bg-navy-deep/85 backdrop-blur-md" : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:h-28 lg:px-10">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
         <Link to="/" className="flex items-center">
           <img
             src={logoUrl}
@@ -75,7 +75,7 @@ export function Header() {
                 </Link>
 
                 {isProducts && products.length > 0 && (
-                  <div className="invisible absolute left-1/2 top-full z-50 w-64 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                  <div className="invisible absolute left-1/2 top-full z-50 w-40 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
                     <div className="overflow-hidden border border-white/10 bg-navy-deep/95 shadow-2xl backdrop-blur-md">
                       <Link
                         to="/products"
