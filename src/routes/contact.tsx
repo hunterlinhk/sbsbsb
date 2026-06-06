@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, RefreshCw } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
@@ -19,17 +19,45 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+type Captcha = { a: number; b: number; op: "+" | "-"; answer: number };
+
+function makeCaptcha(): Captcha {
+  const op: "+" | "-" = Math.random() < 0.5 ? "+" : "-";
+  if (op === "+") {
+    const a = Math.floor(Math.random() * 9) + 1;
+    const b = Math.floor(Math.random() * (10 - a)) + 1;
+    return { a, b, op, answer: a + b };
+  }
+  const a = Math.floor(Math.random() * 9) + 2;
+  const b = Math.floor(Math.random() * (a - 1)) + 1;
+  return { a, b, op, answer: a - b };
+}
+
 function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [captcha, setCaptcha] = useState<Captcha>(() => makeCaptcha());
+  const [captchaInput, setCaptchaInput] = useState("");
   const { data: cdata } = useQuery({ queryKey: ["contact-content"], queryFn: () => getContactContent(), staleTime: 60_000 });
   const { data: sdata } = useQuery({ queryKey: ["site-settings"], queryFn: () => getSiteSettings(), staleTime: 60_000 });
   const c = cdata?.item;
   const s = sdata?.item;
 
+  const refreshCaptcha = useCallback(() => {
+    setCaptcha(makeCaptcha());
+    setCaptchaInput("");
+  }, []);
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
+
+    if (Number(captchaInput) !== captcha.answer) {
+      toast.error("验证码错误，请重新输入");
+      refreshCaptcha();
+      return;
+    }
+
     setSubmitting(true);
     try {
       await submitInquiry({
@@ -43,6 +71,7 @@ function ContactPage() {
       });
       toast.success("已收到您的询盘，我们会尽快与您联系！");
       form.reset();
+      refreshCaptcha();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "提交失败，请稍后再试");
     } finally {
@@ -99,20 +128,49 @@ function ContactPage() {
               <Reveal className="lg:col-span-3" delay={0.15}>
                 <form onSubmit={onSubmit} className="border border-border bg-white p-8 lg:p-12">
                   <h3 className="font-display text-2xl font-bold text-navy-deep">{c?.form_title || "发送询盘"}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{c?.form_intro || "填写以下信息，我们会在 1 个工作日内回复您。"}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{c?.form_intro || "填写以下信息，我们会在 1 个工作日内联系您。"}</p>
                   <div className="mt-8 grid gap-6 sm:grid-cols-2">
                     <Field label="您的姓名 *" name="name" required />
                     <Field label="公司名称" name="company" />
                     <Field label="联系电话 *" name="phone" required />
-                    <Field label="邮箱 *" name="email" type="email" required />
+                    <Field label="邮箱" name="email" type="email" />
                   </div>
                   <div className="mt-6">
                     <Field label="询盘内容 *" name="message" required textarea />
                   </div>
-                  <button type="submit" disabled={submitting}
-                    className="mt-8 inline-flex items-center gap-2 bg-navy-deep px-7 py-4 text-sm font-medium text-white transition-all hover:bg-navy disabled:opacity-60">
-                    {submitting ? "发送中..." : "发送询盘"} <Send size={14} />
-                  </button>
+
+                  <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <label className="block sm:max-w-xs">
+                      <span className="text-xs font-medium uppercase tracking-wider text-navy-deep">验证码 *</span>
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="select-none border border-border bg-silver/40 px-4 py-3 font-display text-base font-bold text-navy-deep">
+                          {captcha.a} {captcha.op} {captcha.b} = ?
+                        </div>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={captchaInput}
+                          onChange={(e) => setCaptchaInput(e.target.value.replace(/[^\d-]/g, ""))}
+                          required
+                          className="w-24 border border-border bg-white px-4 py-3 text-sm text-navy-deep outline-none transition-colors focus:border-mid-blue"
+                          placeholder="答案"
+                        />
+                        <button
+                          type="button"
+                          onClick={refreshCaptcha}
+                          aria-label="刷新验证码"
+                          className="flex h-11 w-11 items-center justify-center border border-border text-navy-deep transition-colors hover:bg-silver/40"
+                        >
+                          <RefreshCw size={16} />
+                        </button>
+                      </div>
+                    </label>
+
+                    <button type="submit" disabled={submitting}
+                      className="inline-flex items-center gap-2 bg-navy-deep px-7 py-4 text-sm font-medium text-white transition-all hover:bg-navy disabled:opacity-60">
+                      {submitting ? "发送中..." : "发送询盘"} <Send size={14} />
+                    </button>
+                  </div>
                 </form>
               </Reveal>
             </div>
