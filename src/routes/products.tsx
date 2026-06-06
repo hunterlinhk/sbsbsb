@@ -59,7 +59,7 @@ function ProductsPage() {
                 const img = p.cover_url || coilImg;
                 return (
                   <Reveal key={p.id}>
-                    <article className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+                    <article id={`product-${p.id}`} className={`scroll-mt-28 grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
                       <div className="relative overflow-hidden bg-navy-deep">
                         <img src={img} alt={p.name} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105" />
                       </div>
