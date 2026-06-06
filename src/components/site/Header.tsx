@@ -47,7 +47,7 @@ export function Header() {
         scrolled ? "border-b border-white/10 bg-navy-deep/85 backdrop-blur-md" : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:h-28 lg:px-10">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
         <Link to="/" className="flex items-center">
           <img
             src={logoUrl}
