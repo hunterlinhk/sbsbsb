@@ -10,7 +10,7 @@
  * Typography: Libre Baskerville (display) + IBM Plex Sans (body)
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+/* Fonts loaded via <link> tags in src/routes/__root.tsx (remote @import is unsupported by Lightning CSS) */
 
 @font-face {
   font-family: 'YouSheBiaoTiHei';
