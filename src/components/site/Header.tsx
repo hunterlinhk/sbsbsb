@@ -53,6 +53,7 @@ export function Header() {
             src={logoUrl}
             alt={s?.company_name || "Logo"}
             className="h-28 w-auto max-w-[24rem] object-contain lg:h-36 lg:max-w-[32rem]"
+            suppressHydrationWarning
           />
         </Link>
 
