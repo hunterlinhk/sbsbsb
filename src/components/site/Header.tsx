@@ -10,20 +10,25 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { data } = useQuery({
     queryKey: ["site-settings"],
     queryFn: () => getSiteSettings(),
     staleTime: 60_000,
+    enabled: mounted,
   });
   const { data: productsData } = useQuery({
     queryKey: ["products-page"],
     queryFn: () => getProductsPageData(),
     staleTime: 60_000,
+    enabled: mounted,
   });
 
-  const s = data?.item;
+  const s = mounted ? data?.item : undefined;
   const logoUrl = s?.logo_url || defaultLogo;
-  const products = productsData?.products ?? [];
+  const products = mounted ? (productsData?.products ?? []) : [];
   const productsLabel = s?.nav_products || "产品中心";
 
   const links = [
