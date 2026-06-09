@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, Phone } from "lucide-react";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogoAsset from "@/assets/jinghong-logo-v2.png.asset.json";
 import { getSiteSettings } from "@/lib/site.functions";
+
+const defaultLogo = defaultLogoAsset.url;
 
 export function Footer() {
   const { data } = useQuery({
