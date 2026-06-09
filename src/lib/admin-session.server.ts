@@ -33,7 +33,9 @@ export async function getAdminSession() {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      // The admin page is often used inside the Lovable preview iframe;
+      // SameSite=Lax prevents the HttpOnly session cookie from being sent there.
+      sameSite: "none",
       path: "/",
     },
   });
@@ -50,7 +52,8 @@ export async function getAdminSessionForLogin(remember: boolean) {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      // Required so the preview iframe can persist and send the admin session.
+      sameSite: "none",
       path: "/",
       maxAge: remember ? LONG_TTL : undefined, // omit -> session cookie
     },
