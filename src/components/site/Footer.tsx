@@ -1,17 +1,24 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, Phone } from "lucide-react";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogoAsset from "@/assets/jinghong-logo-v2.png.asset.json";
 import { getSiteSettings } from "@/lib/site.functions";
 
+const defaultLogo = defaultLogoAsset.url;
+
 export function Footer() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { data } = useQuery({
     queryKey: ["site-settings"],
     queryFn: () => getSiteSettings(),
     staleTime: 60_000,
+    enabled: mounted,
   });
 
-  const s = data?.item;
+  const s = mounted ? data?.item : undefined;
   const logoUrl = s?.logo_url || defaultLogo;
   const copyright = (s?.footer_copyright || "Copyright {year} Company. All rights reserved.").replace(
     "{year}",
