@@ -1,0 +1,1 @@
+UPDATE products SET name = '中大功率无线充线圈', name_en = 'Medium/High Power Wireless Charging Coils', intro = '800股线径，功率>10KW', features = '["线径规格：800股","功率输出：>10KW","工艺：精密绕线 + 自动化贴合","应用领域：大功率充电设备、工业设备"]', applications = '大功率充电设备、工业设备、电动汽车' WHERE id = '5c686203-6eca-4a82-b1dc-b6e8e74995d1'
