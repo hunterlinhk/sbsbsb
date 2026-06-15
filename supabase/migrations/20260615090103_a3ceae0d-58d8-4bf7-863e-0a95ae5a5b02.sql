@@ -1,0 +1,1 @@
+UPDATE products SET name = '超薄无线充线圈', name_en = 'Ultra-thin Wireless Charging Coils', intro = '厚度<5毫米，充电效率能达到15W（苹果快充）', features = '["厚度：<5毫米","充电效率：15W（苹果快充）","标准兼容：支持 Qi 无线充电标准","应用领域：智能手机、可穿戴设备"]', applications = '智能手机、TWS耳机仓、可穿戴设备' WHERE id = 'a3d43d71-86e7-4365-83ba-3a8f65886337'
