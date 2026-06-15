@@ -1,0 +1,1 @@
+UPDATE products SET name = 'VCM线圈', name_en = 'VCM Coils', intro = '年出货超1亿PCS，市占率>10%，为小米、三星、华为手机配套', features = '["年出货量：超1亿PCS","市场市占率：>10%","配套客户：小米、三星、华为","应用领域：手机摄像头VCM模组"]', applications = '智能手机摄像头模组、VCM马达' WHERE id = '9b1ca8a9-5bed-4377-b5de-d726065c03c5'
