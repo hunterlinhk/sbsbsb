@@ -152,14 +152,15 @@ export function Header() {
                         {products.map((p) => (
                           <Link
                             key={p.id}
-                            to="/products"
-                            hash={`product-${p.id}`}
+                            to="/products/$id"
+                            params={{ id: p.id }}
                             onClick={() => setOpen(false)}
                             className="block py-2 text-sm text-silver/70"
                           >
                             {p.name}
                           </Link>
                         ))}
+
                       </div>
                     )}
                   </div>
