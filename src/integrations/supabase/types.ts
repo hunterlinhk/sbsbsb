@@ -465,6 +465,7 @@ export type Database = {
           name_en: string | null
           process: string | null
           published: boolean
+          slug: string | null
           sort_order: number
           updated_at: string
         }
@@ -480,6 +481,7 @@ export type Database = {
           name_en?: string | null
           process?: string | null
           published?: boolean
+          slug?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -495,6 +497,7 @@ export type Database = {
           name_en?: string | null
           process?: string | null
           published?: boolean
+          slug?: string | null
           sort_order?: number
           updated_at?: string
         }
