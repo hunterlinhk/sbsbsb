@@ -16,6 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
@@ -58,6 +59,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProductsRoute,
+} as any)
 const NewsIdRoute = NewsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -95,8 +101,9 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
-  '/products': typeof ProductsRoute
+  '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -110,8 +117,9 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
-  '/products': typeof ProductsRoute
+  '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -126,8 +134,9 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/news': typeof NewsRouteWithChildren
-  '/products': typeof ProductsRoute
+  '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/products/$slug'
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/products/$slug'
     | '/admin'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
+    | '/products/$slug'
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -189,7 +201,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   NewsRoute: typeof NewsRouteWithChildren
-  ProductsRoute: typeof ProductsRoute
+  ProductsRoute: typeof ProductsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLiveEditorHomeRoute: typeof AdminLiveEditorHomeRoute
   AdminPuckHomeRoute: typeof AdminPuckHomeRoute
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
+      parentRoute: typeof ProductsRoute
+    }
     '/news/$id': {
       id: '/news/$id'
       path: '/$id'
@@ -304,13 +323,25 @@ const NewsRouteChildren: NewsRouteChildren = {
 
 const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
 
+interface ProductsRouteChildren {
+  ProductsSlugRoute: typeof ProductsSlugRoute
+}
+
+const ProductsRouteChildren: ProductsRouteChildren = {
+  ProductsSlugRoute: ProductsSlugRoute,
+}
+
+const ProductsRouteWithChildren = ProductsRoute._addFileChildren(
+  ProductsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   NewsRoute: NewsRouteWithChildren,
-  ProductsRoute: ProductsRoute,
+  ProductsRoute: ProductsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   AdminLiveEditorHomeRoute: AdminLiveEditorHomeRoute,
   AdminPuckHomeRoute: AdminPuckHomeRoute,
