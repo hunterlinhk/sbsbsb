@@ -59,8 +59,8 @@ function ProductsPage() {
                 return (
                   <Reveal key={p.id}>
                     <Link
-                      to="/products/$id"
-                      params={{ id: p.id }}
+                      to="/products/$slug"
+                      params={{ slug: p.slug ?? p.id }}
                       className="group flex h-full flex-col overflow-hidden border border-border bg-white transition-all hover:-translate-y-1 hover:shadow-2xl"
                     >
                       <div className="relative aspect-[4/3] overflow-hidden bg-navy-deep">
