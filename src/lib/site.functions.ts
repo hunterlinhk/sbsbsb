@@ -42,6 +42,15 @@ export const getProductsPageData = createServerFn({ method: "GET" }).handler(
   },
 );
 
+export const getProductById = createServerFn({ method: "GET" })
+  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const { data: product } = await supabaseAdmin
+      .from("products").select("*").eq("id", data.id).eq("published", true).maybeSingle();
+    return { product };
+  });
+
+
 export const getAboutContent = createServerFn({ method: "GET" }).handler(
   async () => {
     const { data, error } = await supabaseAdmin

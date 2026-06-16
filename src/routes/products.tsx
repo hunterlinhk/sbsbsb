@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
@@ -12,10 +12,10 @@ import { getProductsPageData } from "@/lib/site.functions";
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "产品中心 — 精密线圈与微型直线电机 | 景鸿科技" },
-      { name: "description", content: "景鸿科技产品中心：精密线圈、无线充线圈、微型直线电机。" },
+      { title: "产品中心 — 精密线圈与无线充电线圈 | 景鸿科技" },
+      { name: "description", content: "景鸿科技产品中心：VCM线圈、超薄无线充电线圈、中大功率无线充电线圈、智能手表线圈。" },
       { property: "og:title", content: "产品中心 — 景鸿科技" },
-      { property: "og:description", content: "精密线圈与微型直线电机产品矩阵。" },
+      { property: "og:description", content: "精密线圈产品矩阵：VCM、超薄无线充、中大功率无线充、手表线圈。" },
       { property: "og:image", content: coilImg },
     ],
   }),
@@ -45,7 +45,7 @@ function ProductsPage() {
                 精密制造<br /><span className="italic text-mid-blue">产品矩阵</span>
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-relaxed text-silver/80 md:text-lg">
-                覆盖精密线圈、无线充线圈与微型直线电机三大核心产品线，以稳定的产能和严苛的品质标准服务全球知名手机品牌。
+                覆盖 VCM 线圈、超薄无线充电线圈、中大功率无线充电线圈与智能手表线圈，以稳定的产能和严苛的品质标准服务全球知名品牌。
               </p>
             </Reveal>
           </div>
@@ -53,44 +53,30 @@ function ProductsPage() {
 
         <section className="bg-background py-24 lg:py-32">
           <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="space-y-20 lg:space-y-32">
-              {products.map((p, i) => {
-                const features = (p.features as string[] | null) ?? [];
+            <div className="grid gap-8 md:grid-cols-2">
+              {products.map((p) => {
                 const img = p.cover_url || coilImg;
                 return (
                   <Reveal key={p.id}>
-                    <article id={`product-${p.id}`} className={`scroll-mt-28 grid items-center gap-10 lg:grid-cols-2 lg:gap-16 ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
-                      <div className="relative overflow-hidden bg-navy-deep">
-                        <img src={img} alt={p.name} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105" />
+                    <Link
+                      to="/products/$id"
+                      params={{ id: p.id }}
+                      className="group flex h-full flex-col overflow-hidden border border-border bg-white transition-all hover:-translate-y-1 hover:shadow-2xl"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-navy-deep">
+                        <img src={img} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       </div>
-                      <div>
+                      <div className="flex flex-1 flex-col p-8">
                         {p.name_en ? (
                           <div className="text-xs font-medium uppercase tracking-[0.3em] text-mid-blue">{p.name_en}</div>
                         ) : null}
-                        <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-navy-deep md:text-5xl">{p.name}</h2>
-                        <div className="mt-6 h-px w-16 bg-navy-deep" />
-                        <p className="mt-6 text-base leading-relaxed text-muted-foreground">{p.intro}</p>
-                        {features.length > 0 && (
-                          <ul className="mt-8 space-y-3">
-                            {features.map((s) => (
-                              <li key={s} className="flex items-start gap-3 text-sm text-navy-deep">
-                                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-mid-blue" />
-                                <span>{s}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {p.applications ? (
-                          <p className="mt-4 text-sm text-muted-foreground"><strong className="text-navy-deep">应用领域：</strong>{p.applications}</p>
-                        ) : null}
-                        {p.process ? (
-                          <p className="mt-2 text-sm text-muted-foreground"><strong className="text-navy-deep">工艺说明：</strong>{p.process}</p>
-                        ) : null}
-                        <Link to="/contact" className="mt-10 inline-flex items-center gap-2 bg-navy-deep px-6 py-3 text-sm font-medium text-white transition-all hover:bg-navy">
-                          咨询详情 <ArrowRight size={14} />
-                        </Link>
+                        <h2 className="mt-3 font-display text-2xl font-bold text-navy-deep md:text-3xl">{p.name}</h2>
+                        <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{p.intro}</p>
+                        <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-navy-deep group-hover:text-mid-blue">
+                          查看详情 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                        </span>
                       </div>
-                    </article>
+                    </Link>
                   </Reveal>
                 );
               })}
