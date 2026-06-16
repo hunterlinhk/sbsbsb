@@ -93,8 +93,8 @@ export function Header() {
                         {products.map((p) => (
                           <Link
                             key={p.id}
-                            to="/products/$id"
-                            params={{ id: p.id }}
+                            to="/products/$slug"
+                            params={{ slug: p.slug ?? p.id }}
                             className="block px-5 py-2.5 text-sm text-silver/80 transition-colors hover:bg-mid-blue/20 hover:text-white"
                           >
                             {p.name}
@@ -152,8 +152,8 @@ export function Header() {
                         {products.map((p) => (
                           <Link
                             key={p.id}
-                            to="/products/$id"
-                            params={{ id: p.id }}
+                            to="/products/$slug"
+                            params={{ slug: p.slug ?? p.id }}
                             onClick={() => setOpen(false)}
                             className="block py-2 text-sm text-silver/70"
                           >

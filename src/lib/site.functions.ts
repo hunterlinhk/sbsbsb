@@ -42,13 +42,16 @@ export const getProductsPageData = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export const getProductById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+export const getProductBySlug = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) =>
+    z.object({ slug: z.string().min(1).max(80) }).parse(data),
+  )
   .handler(async ({ data }) => {
     const { data: product } = await supabaseAdmin
-      .from("products").select("*").eq("id", data.id).eq("published", true).maybeSingle();
+      .from("products").select("*").eq("slug", data.slug).eq("published", true).maybeSingle();
     return { product };
   });
+
 
 
 export const getAboutContent = createServerFn({ method: "GET" }).handler(

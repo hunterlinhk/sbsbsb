@@ -16,7 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as ProductsIdRouteImport } from './routes/products.$id'
+import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
@@ -59,9 +59,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductsIdRoute = ProductsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => ProductsRoute,
 } as any)
 const NewsIdRoute = NewsIdRouteImport.update({
@@ -103,7 +103,7 @@ export interface FileRoutesByFullPath {
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -119,7 +119,7 @@ export interface FileRoutesByTo {
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -136,7 +136,7 @@ export interface FileRoutesById {
   '/news': typeof NewsRouteWithChildren
   '/products': typeof ProductsRouteWithChildren
   '/news/$id': typeof NewsIdRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/live-editor/home': typeof AdminLiveEditorHomeRoute
   '/admin/puck/home': typeof AdminPuckHomeRoute
@@ -154,7 +154,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -170,7 +170,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -186,7 +186,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/products'
     | '/news/$id'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin/'
     | '/admin/live-editor/home'
     | '/admin/puck/home'
@@ -261,11 +261,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/products/$id': {
-      id: '/products/$id'
-      path: '/$id'
-      fullPath: '/products/$id'
-      preLoaderRoute: typeof ProductsIdRouteImport
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
       parentRoute: typeof ProductsRoute
     }
     '/news/$id': {
@@ -324,11 +324,11 @@ const NewsRouteChildren: NewsRouteChildren = {
 const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
 
 interface ProductsRouteChildren {
-  ProductsIdRoute: typeof ProductsIdRoute
+  ProductsSlugRoute: typeof ProductsSlugRoute
 }
 
 const ProductsRouteChildren: ProductsRouteChildren = {
-  ProductsIdRoute: ProductsIdRoute,
+  ProductsSlugRoute: ProductsSlugRoute,
 }
 
 const ProductsRouteWithChildren = ProductsRoute._addFileChildren(
