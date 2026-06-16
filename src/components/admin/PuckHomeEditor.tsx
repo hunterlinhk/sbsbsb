@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Puck, Render, type Data } from "@measured/puck";
-import "@measured/puck/puck.css";
+import "@/styles/puck.css";
 import { buildPuckConfig, defaultPuckData, isValidPuckData } from "@/lib/puck-config";
 import { getAdminToken } from "@/lib/admin-auth";
 import { getHomeContent, getHomePuckData, saveHomePuckData, updateCustomFonts, uploadFont } from "@/lib/site.functions";
