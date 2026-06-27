@@ -1,54 +1,49 @@
-## 目标
-将产品中心重构为 **3 个主类目**，每个类目是一个独立的详情页面，页面内罗列若干"子产品"组件卡片。
+## 我理解的需求
 
-## 三个主类目与子产品
+- **"产品中心"** 按钮 → 跳转到总览页 `/products`，展示 3 个主类目卡片（精密线圈 / 无线充线圈 / 微型直线电机）。
+- **下拉菜单的 3 个子项** → 各自跳转到独立的详情介绍页：
+  - `/products/precision-coils` — 精密线圈
+  - `/products/wireless-charging-coils` — 无线充线圈
+  - `/products/micro-linear-motors` — 微型直线电机
+- 每个详情页需要**丰富的虚构内容**，不只是子产品列表，而是一个完整、可读、有营销感的产品介绍页面。
 
-### 1. 精密线圈 (`/products/precision-coils`)
-- VCM线圈
-- 工业类线圈
-- 医疗设备类线圈
-- 家电类线圈
+## 每个详情页将包含的栏目（统一模板，内容各异）
 
-### 2. 无线充线圈 (`/products/wireless-charging-coils`)
-- 超薄无线充电线圈
-- 中大功率无线充电线圈
-- 手表线圈
+1. **Hero 区**：类目大标题 + 一句副标题 + 配图区（占位）+ 行业地位简介（虚构数据，如年产能、客户、市占率）。
+2. **产品概述**：2–3 段虚构的类目总体介绍，强调技术沉淀、应用领域、品牌客户。
+3. **子产品系列卡片**：保留之前的子产品（标题 + 详细描述），每个卡片再补充虚构的"关键参数"小列表（如线径、功率、效率、温升等）。
+   - 精密线圈：VCM线圈、工业类线圈、医疗设备类线圈、家电类线圈
+   - 无线充线圈：超薄无线充电线圈、中大功率无线充电线圈、手表线圈
+   - 微型直线电机：虚构 3 个子产品（如 手机摄像头马达、医疗精密驱动马达、智能家居微型马达）
+4. **技术优势**：4 项虚构优势（图标 + 标题 + 简述），例如自动化产线、品质管控、研发能力、规模交付。
+5. **典型应用场景**：4–6 个虚构场景（小米手机、华为手表、特斯拉储能等），配 logo 占位。
+6. **工艺参数表**：一张虚构规格表（参数名 + 数值范围）。
+7. **CTA**：「咨询此类产品」按钮 → 跳转 `/contact`。
 
-### 3. 微型直线电机 (`/products/micro-linear-motors`)
-- 保留现有简介内容（暂无新子产品文案，沿用现状）
+## 改动方式
 
-## 改动详情
+- **数据库**：扩展 `products` 表 3 条记录的 `intro` / `applications` / `process` 字段，并把详情页所需的扩展内容（hero 副标题、技术优势、应用场景、参数表等）统一存进 `features` JSONB（结构化对象），微型直线电机也补齐子产品数组。
+- **路由**：保留现有 `src/routes/products.$slug.tsx`，重写其组件，按上面 7 个栏目渲染。`src/routes/products.tsx` 总览页保持现状（3 个类目卡片）。
+- **导航**：`Header.tsx` 已经是 slug 跳转，无需改动。
+- **不需要新建额外路由文件**——一个动态路由 `$slug` 已经能承载 3 个独立详情页。
 
-### 数据库（products 表）
-- 清理上一轮按"子产品"拆出的 4 条独立记录，恢复为 **3 条主类目记录**：
-  - `精密线圈` / `precision-coils`
-  - `无线充线圈` / `wireless-charging-coils`
-  - `微型直线电机` / `micro-linear-motors`
-- 每条记录的 `features` (JSONB) 改为存储该类目下的**子产品数组**，每个子产品包含 `title` + `description`（取代单纯字符串数组），例如：
+## 技术细节（开发者向）
+
+- `features` JSONB 改为对象结构：
   ```json
-  [
-    {"title":"VCM线圈","description":"年出货量超过 1亿PCS..."},
-    {"title":"工业类线圈","description":"应用于工业自动化设备..."},
-    ...
-  ]
+  {
+    "hero_subtitle": "...",
+    "overview": ["段落1", "段落2"],
+    "sub_products": [{ "title": "...", "description": "...", "specs": ["..."] }],
+    "advantages": [{ "title": "...", "description": "..." }],
+    "scenarios": [{ "name": "...", "description": "..." }],
+    "spec_table": [{ "name": "...", "value": "..." }]
+  }
   ```
-- 新增 `slug` 字段（text, unique），用于 URL 友好路由；或继续用 id（见下方"路由方式"选择）。
+- `products.$slug.tsx` 按上述对象渲染；类型放宽为 `any`/局部接口，避免改 `types.ts`。
+- 用 `supabase--insert` 工具更新现有 3 条记录的字段（不是迁移）。
+- `getProductBySlug` 已存在，无需改动。
 
-### 路由
-- 删除按 UUID 跳转的 `src/routes/products.$id.tsx`，新建 `src/routes/products.$slug.tsx`（基于 slug，URL 更清晰）。
-- 详情页布局：顶部 Hero（类目名 + intro），下方按子产品卡片列表（标题 + 描述），不再有单一"核心特点"勾选列表。
-- `products.tsx` 列表页继续展示 3 个主类目卡片，链接到 `/products/$slug`。
+## 一个小确认
 
-### 导航
-- `Header.tsx` 下拉菜单显示 3 个主类目，使用 `to="/products/$slug" params={{ slug: p.slug }}`。
-- 移动端菜单同步更新。
-
-### 数据获取
-- `getProductById` 替换为 `getProductBySlug`（接受 slug）。
-- `getProductsPageData` 保持返回 3 条记录。
-
-## 选项请确认
-
-**路由方式：用 slug（推荐，URL 如 `/products/precision-coils`）还是继续用 UUID？** 我默认采用 slug。
-
-确认后我会进入 build 模式：迁移加 slug 字段 → 用 insert 工具重置 3 条记录 → 重写路由文件 → 更新 Header。
+**微型直线电机** 你没给文案，我可以**全部虚构** 3 个子产品 + 详情内容，风格与前两个类目一致。如不希望我虚构这一类，请告诉我，我会让它的详情页保持简洁（仅 hero + 概述）。
