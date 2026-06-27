@@ -9,7 +9,7 @@ import workshopImg from "@/assets/workshop.jpg";
 import qualityImg from "@/assets/quality.jpg";
 import { getProductsPageData } from "@/lib/site.functions";
 
-export const Route = createFileRoute("/products")({
+export const Route = createFileRoute("/products/")({
   head: () => ({
     meta: [
       { title: "产品中心 — 精密线圈与无线充电线圈 | 景鸿科技" },
